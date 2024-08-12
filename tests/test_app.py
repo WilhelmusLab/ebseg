@@ -62,36 +62,21 @@ def check_sums(p1, p2):
 # Check final images
 def _test_output(tmpdir):
     expdir = Path("tests/expected")
-    # Check all tif images, including final and identification rounds
-    # -----------------------------------------------------------------
+    # Check all tif images, including final and identification rounds, and csv and txt files
+    # --------------------------------------------------------------------------------------
     for d in getdirs(tmpdir):
-        for tif in d.glob("*.tif"):
-            expected = expdir / tif.relative_to(tmpdir)
-            assert are_equal(tif, expected)
-            assert are_files_identical(tif, expected)
-            assert are_images_identical(tif, expected)
-
-    # Check mask values
-    # -----------------------------------------------------------------
-    maskvalues214 = tmpdir / "214/mask_values.txt"
-    maskvalues214expected = expdir / "214/mask_values.txt"
-    assert are_equal(maskvalues214, maskvalues214expected)
-    assert are_files_identical(maskvalues214, maskvalues214expected)
-
-    maskvalues215 = tmpdir / "215/mask_values.txt"
-    maskvalues215expected = expdir / "215/mask_values.txt"
-    assert are_equal(maskvalues215, maskvalues215expected)
-    assert are_files_identical(maskvalues215, maskvalues215expected)
-
-    # Check feature extraction
-    # -----------------------------------------------------------------
-    features214 = tmpdir / "214/2012-08-01_terra_props.csv"
-    features214expected = expdir / "214/2012-08-01_terra_props.csv"
-    assert check_sums(features214, features214expected)
-
-    features215 = tmpdir / "215/2012-08-02_terra_props.csv"
-    features215expected = expdir / "215/2012-08-02_terra_props.csv"
-    assert check_sums(features215, features215expected)
+        for file in d.glob(
+            "*[!.png]"
+        ):  # Exclude png files as they are not created in the original code
+            expected = expdir / file.relative_to(tmpdir)
+            if file.suffix == ".csv":
+                assert check_sums(file, expected)
+                continue
+            if file.suffix == ".tif":
+                assert are_images_identical(file, expected)
+            assert files_are_equal(file, expected)
+            assert are_files_identical(file, expected)
+            assert are_equal(file, expected)
 
 
 @pytest.mark.smoke
