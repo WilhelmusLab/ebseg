@@ -50,9 +50,15 @@ def main(
     crs: str = "EPSG:3413",
     ts: int = 1683675557694,
     format: str = "image/tiff",
-    quiet: Annotated[bool, typer.Option()] = False,
-    verbose: Annotated[bool, typer.Option()] = False,
-    debug: Annotated[bool, typer.Option()] = False,
+    quiet: Annotated[
+        bool, typer.Option(help="make the program less talkative")
+    ] = False,
+    verbose: Annotated[
+        bool, typer.Option(help="make the program more talkative")
+    ] = False,
+    debug: Annotated[
+        bool, typer.Option(help="make the program much more talkative")
+    ] = False,
 ):
     if debug:
         logging.basicConfig(level=logging.DEBUG)
