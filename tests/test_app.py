@@ -40,24 +40,26 @@ def check_sums(p1, p2):
 # Check final images
 def _test_output(tmpdir):
     expdir = Path("tests/expected")
-    # Check final images
+    # Check all tif images, including final and identification rounds
     # -----------------------------------------------------------------
-    f214 = tmpdir / "214" / "2012-08-01_terra_final.tif"
-    f214expected = expdir / "214/2012-08-01_214_terra_final.tif"
-    assert are_equal(f214, f214expected)
-    f215expected = expdir / "215/2012-08-02_215_terra_final.tif"
-    f215 = tmpdir / "215/2012-08-02_terra_final.tif"
-    assert are_equal(f215, f215expected)
+    for d in getdirs(tmpdir):
+        for tif in d.glob("*.tif"):
+            expected = expdir / tif.relative_to(tmpdir)
+            assert are_equal(tif, expected)
+            assert are_files_identical(tif, expected)
+            assert are_images_identical(tif, expected)
 
     # Check mask values
     # -----------------------------------------------------------------
     maskvalues214 = tmpdir / "214/mask_values.txt"
     maskvalues214expected = expdir / "214/mask_values.txt"
     assert are_equal(maskvalues214, maskvalues214expected)
+    assert are_files_identical(maskvalues214, maskvalues214expected)
 
     maskvalues215 = tmpdir / "215/mask_values.txt"
     maskvalues215expected = expdir / "215/mask_values.txt"
     assert are_equal(maskvalues215, maskvalues215expected)
+    assert are_files_identical(maskvalues215, maskvalues215expected)
 
     # Check feature extraction
     # -----------------------------------------------------------------
