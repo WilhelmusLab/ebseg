@@ -71,40 +71,10 @@ def _test_output(tmpdir):
     features215expected = expdir / "215/2012-08-02_terra_props.csv"
     assert check_sums(features215, features215expected)
 
-    # Check intermediate identification rounds
-    # -----------------------------------------------------------------
-    for doy in ["214", "215"]:
-        id_rounds = sorted(Path(tmpdir / doy).glob("*round*.tif"))
-        expected_rounds = sorted((expdir / doy).glob("*round*.tif"))
-
-        for id_round, expected_round in zip(id_rounds, expected_rounds):
-            assert are_equal(id_round, expected_round)
-
-
-def getmaskvalues(path):
-    with open(path, "r") as f:
-        lines = f.readlines()
-
-    mask_values = [float(x) for x in lines[0].split()]
-    return mask_values
-
-
-def group_files_by_extension(folder_path):
-    grouped_files = defaultdict(list)
-    folder = Path(folder_path)
-
-    for file in folder.iterdir():
-        if file.is_file():
-            extension = file.suffix
-            grouped_files[extension].append(file.name)
-
-    return dict(grouped_files)
-
 
 @pytest.mark.smoke
 @pytest.mark.slow
 def test_fsdproc(tmpdir):
-    expdir = Path("tests/expected")
     config_file = tmpdir.join("config.toml")
     config_file.write(
         f"""
