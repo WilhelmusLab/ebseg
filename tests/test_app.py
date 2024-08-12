@@ -1,11 +1,30 @@
 from pathlib import Path
 import subprocess
 from collections import defaultdict
+import filecmp
 
 import pytest
 import pandas as pd
+import rasterio
+import numpy as np
 
 from ebfloeseg.app import parse_config_file
+
+
+def getdirs(p: Path):
+    return [x for x in Path(p).iterdir() if x.is_dir()]
+
+
+def are_files_identical(file1, file2):
+    return filecmp.cmp(file1, file2, shallow=False)
+
+
+def are_images_identical(image1_path, image2_path):
+    with (
+        rasterio.open(str(image1_path)) as img1,
+        rasterio.open(str(image2_path)) as img2,
+    ):
+        return np.array_equal(img1.read(), img2.read())
 
 
 def are_equal(p1, p2):
