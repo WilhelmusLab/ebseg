@@ -109,7 +109,7 @@ def process_images(
     ftcis = sorted(Path(ftci_direc).iterdir())
     fclouds = sorted(Path(fcloud_direc).iterdir())
 
-    with ProcessPoolExecutor() as executor:
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = []
         for ftci, fcloud in zip(ftcis, fclouds):
             future = executor.submit(
