@@ -61,13 +61,15 @@ def main(
     ] = False,
 ):
     if debug:
-        logging.basicConfig(level=logging.DEBUG)
+        level = logging.DEBUG
     elif verbose:
-        logging.basicConfig(level=logging.INFO)
+        level = logging.INFO
     elif quiet:
-        logging.basicConfig(level=logging.ERROR)
+        level = logging.ERROR
     else:
-        logging.basicConfig(level=logging.WARNING)
+        level = logging.WARNING
+    
+    logging.basicConfig(level=level)
 
     match kind:
         case ImageType.truecolor:
