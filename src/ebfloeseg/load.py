@@ -25,9 +25,6 @@ def get_width_height(bbox: str, scale: float):
         >>> get_width_height("0,0,1,5", 10)
         (2, 10)
 
-        >>> get_width_height("0,0,1,5", 10)
-        (2, 10)
-
     """
     x1, y1, x2, y2 = [float(n) for n in bbox.split(",")]
     x_length = abs(x2 - x1)
