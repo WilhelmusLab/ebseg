@@ -14,6 +14,29 @@ def getdirs(p: Path):
     return [x for x in Path(p).iterdir() if x.is_dir()]
 
 
+def files_are_equal(file1, file2, chunk_size=1024):
+    """
+    Check if two files are equal by sequentially comparing their contents.
+
+    Args:
+        file1 (str): The path to the first file.
+        file2 (str): The path to the second file.
+
+    Returns:
+        bool: True if the files are equal, False otherwise.
+    """
+    with open(file1, "rb") as f1, open(file2, "rb") as f2:
+        while True:
+            b1 = f1.read(chunk_size)
+            b2 = f2.read(chunk_size)
+
+            if b1 != b2:
+                return False
+
+            if not b1:  # End of file reached
+                return True
+
+
 def are_files_identical(file1, file2):
     return filecmp.cmp(file1, file2, shallow=False)
 
