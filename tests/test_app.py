@@ -53,10 +53,10 @@ def are_equal(p1, p2):
     return Path(p1).read_bytes() == Path(p2).read_bytes()
 
 
-def check_sums(p1, p2):
-    s1 = pd.read_csv(p1).to_numpy().sum()
-    s2 = pd.read_csv(p2).to_numpy().sum()
-    return s1 == s2
+def read_to_df(p1, p2):
+    df1 = pd.read_csv(p1)
+    df2 = pd.read_csv(p2)
+    return df1, df2
 
 
 # Check final images
@@ -70,7 +70,8 @@ def _test_output(tmpdir):
         ):  # Exclude png files as they are not created in the original code
             expected = expdir / file.relative_to(tmpdir)
             if file.suffix == ".csv":
-                assert check_sums(file, expected)
+                df_file, df_expected = read_to_df(file, expected)
+                pd.testing.assert_frame_equal(df_file, df_expected)
                 continue
             if file.suffix == ".tif":
                 assert are_images_identical(file, expected)
