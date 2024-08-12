@@ -7,9 +7,6 @@ import tomllib
 import typer
 from typing import Optional
 
-
-import pandas as pd
-
 from ebfloeseg.masking import create_land_mask
 from ebfloeseg.preprocess import preprocess
 
