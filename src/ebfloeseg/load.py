@@ -68,7 +68,7 @@ def main(
         level = logging.ERROR
     else:
         level = logging.WARNING
-    
+
     logging.basicConfig(level=level)
 
     match kind:
