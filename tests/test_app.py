@@ -1,6 +1,5 @@
 from pathlib import Path
 import subprocess
-from collections import defaultdict
 import filecmp
 
 import pytest
