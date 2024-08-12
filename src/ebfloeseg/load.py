@@ -19,10 +19,10 @@ def get_width_height(bbox: str, scale: float):
     """Get width and height for a bounding box where one pixel corresponds to `scale` bounding box units
 
     Examples:
-        >>> get_width_height("0,0,1,1", 10)
-        (10, 10)
+        >>> get_width_height("0,0,1,1", 1)
+        (1, 1)
 
-        >>> get_width_height("0,0,1,5", 10)
+        >>> get_width_height("0,0,10,50", 5)
         (2, 10)
 
     """
