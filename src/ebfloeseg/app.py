@@ -243,5 +243,24 @@ def process_batch(
             future.result()
 
 
+@app.command()
+def get_bbox(
+    datafile: Annotated[Path, typer.Argument()],
+    index: Annotated[str, typer.Argument()],
+    index_col: Annotated[str, typer.Option()] = "location",
+    colnames: Annotated[list[str], typer.Option()] = [
+        "left_x",
+        "lower_y",
+        "right_x",
+        "top_y",
+    ],
+    separator: Annotated[str, typer.Option()] = ",",
+):
+
+    df = pandas.read_csv(datafile, index_col=index_col)
+    output = separator.join(str(s) for s in list(df.loc[index][colnames]))
+    print(output)
+
+
 if __name__ == "__main__":
     app()
