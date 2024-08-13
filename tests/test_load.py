@@ -8,7 +8,13 @@ import requests_mock
 from ebfloeseg.load import load, ImageType, Satellite, DataSet
 
 
-def are_equal(b1: BytesIO, p2):
+def are_equal(b1: BytesIO, p2: Path):
+    """Check whether two files have identical bytes.
+
+    Arguments:
+        b1: io.BytesIO object
+        p2: path to a file to be compared with b1
+    """
     return b1.read() == Path(p2).read_bytes()
 
 
@@ -32,7 +38,7 @@ ExampleDataSetBeaufortSea = DataSet(
 @pytest.mark.smoke
 @pytest.mark.slow
 @pytest.mark.parametrize("kind", ImageType)
-def test_load_check(kind):
+def test_load_runs_in_specific_case_with_validation(kind):
     kwargs = dataclasses.asdict(ExampleDataSetBeaufortSea)
     kwargs.update(kind=kind, scale=10000)
     result = load(**kwargs, format="image/tiff")
@@ -43,7 +49,7 @@ def test_load_check(kind):
 @pytest.mark.slow
 @pytest.mark.parametrize("satellite", Satellite)
 @pytest.mark.parametrize("kind", ImageType)
-def test_load(kind, satellite):
+def test_load_runs_without_crashing_for_different_parameters(kind, satellite):
     load(kind=kind, satellite=satellite, scale=100000)
 
 

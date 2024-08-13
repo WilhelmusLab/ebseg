@@ -24,29 +24,41 @@ class Satellite(str, Enum):
     terra = "terra"
     aqua = "aqua"
 
+def _rescale(x1: int | float, x2: int | float, scale: int | float) -> int:
+    """
+    
+    Examples:
+        >>> _rescale(0, 1, 1)
+        1
+        
+        >>> _rescale(0, 10, 10)
+        1
 
-def get_width_height(bbox: BoundingBox | str, scale: float):
+        >>> _rescale(0, 100, 10)
+        10
+
+    """
+    length = abs(x2 - x1)
+    rescaled_length = int(length / scale)
+    return rescaled_length
+
+
+def _get_width_height(
+    bbox: BoundingBox,
+    scale: int | float,
+) -> tuple[int, int]:
     """Get width and height for a bounding box where one pixel corresponds to `scale` bounding box units
 
     Examples:
-        >>> get_width_height("0,0,1,1", 1)
+        >>> _get_width_height(BoundingBox(0, 0, 1, 1), 1)
         (1, 1)
 
-        >>> get_width_height("0,0,10,50", 5)
+        >>> _get_width_height(BoundingBox(0, 0, 10, 50), 5)
         (2, 10)
 
     """
-    if isinstance(bbox, str):
-        x1, y1, x2, y2 = [float(n) for n in bbox.split(",")]
-    elif isinstance(bbox, tuple):
-        x1, y1, x2, y2 = bbox
-    else:
-        msg = "type of %s not supported" % s
-        raise NotImplementedError(msg)
-    x_length = abs(x2 - x1)
-    y_length = abs(y2 - y1)
-
-    width, height = int(x_length / scale), int(y_length / scale)
+    width = _rescale(bbox.x1, bbox.x2, scale)
+    height = _rescale(bbox.y1, bbox.y2, scale)
     return width, height
 
 
@@ -91,7 +103,7 @@ ExampleDataSetBeaufortSea = DataSet(
     satellite=Satellite.terra,
     kind=ImageType.truecolor,
     scale=250,
-    bbox=(
+    bbox=BoundingBox(
         -2334051,
         -414387,
         -1127689,
@@ -114,6 +126,7 @@ def load(
     format: str = "image/tiff",
     validate: bool = True,
 ) -> LoadResult:
+    """Load an image from the NASA Worldview Snapshots API"""
 
     match (satellite, kind):
         case (Satellite.terra, ImageType.truecolor):
@@ -130,14 +143,14 @@ def load(
             msg = "satellite=%s and image kind=%s not supported" % (satellite, kind)
             raise NotImplementedError(msg)
 
-    width, height = get_width_height(bbox, scale)
+    width, height = _get_width_height(bbox, scale)
     _logger.info("Width: %s Height: %s" % (width, height))
 
     url = f"https://wvs.earthdata.nasa.gov/api/v1/snapshot"
     payload = {
         "REQUEST": "GetSnapshot",
         "TIME": datetime,
-        "BBOX": ",".join(str(f) for f in bbox),
+        "BBOX": f"{bbox.x1},{bbox.y1},{bbox.x2},{bbox.y2}",
         "CRS": crs,
         "LAYERS": layers,
         "WRAP": wrap,
