@@ -50,7 +50,6 @@ def load(
     format: str = "image/tiff",
 ):
 
-
     match (satellite, kind):
         case (Satellite.terra, ImageType.truecolor):
             layers = "MODIS_Terra_CorrectedReflectance_TrueColor"
