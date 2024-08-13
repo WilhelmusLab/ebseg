@@ -43,6 +43,7 @@ def load(
     ts: int = 1683675557694,
     format: str = "image/tiff",
 ):
+    """Load an image from the NASA Worldview Snapshots API"""
 
     match kind:
         case ImageType.truecolor:
