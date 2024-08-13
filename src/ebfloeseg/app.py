@@ -12,6 +12,8 @@ from typing import Annotated, Optional
 import typer
 import pandas
 
+from ebfloeseg.load import ImageType, Satellite
+from ebfloeseg.load import load as load_
 from ebfloeseg.masking import create_land_mask
 from ebfloeseg.preprocess import preprocess, preprocess_b
 from ebfloeseg.load import load as load_
@@ -25,18 +27,111 @@ app = typer.Typer(name=name, add_completion=False)
 
 @app.callback()
 def main(
-    quiet: Annotated[bool, typer.Option()] = False,
-    verbose: Annotated[bool, typer.Option()] = False,
-    debug: Annotated[bool, typer.Option()] = False,
+    quiet: Annotated[
+        bool, typer.Option(help="make the program less talkative")
+    ] = False,
+    verbose: Annotated[
+        bool, typer.Option(help="make the program more talkative")
+    ] = False,
+    debug: Annotated[
+        bool, typer.Option(help="make the program much more talkative")
+    ] = False,
 ):
     if debug:
-        logging.basicConfig(level=logging.DEBUG)
+        level = logging.DEBUG
     elif verbose:
-        logging.basicConfig(level=logging.INFO)
+        level = logging.INFO
     elif quiet:
-        logging.basicConfig(level=logging.ERROR)
+        level = logging.ERROR
     else:
-        logging.basicConfig(level=logging.WARNING)
+        level = logging.WARNING
+
+    logging.basicConfig(level=level)
+    return
+
+
+@app.command()
+def load(
+    outfile: Annotated[Path, typer.Argument()],
+    datetime: str = "2016-07-01T00:00:00Z",
+    wrap: str = "day",
+    satellite: Satellite = Satellite.terra,
+    kind: ImageType = ImageType.truecolor,
+    bbox: str = "-2334051.0214676396,-414387.78951688844,-1127689.8419350237,757861.8364224486",
+    scale: Annotated[
+        int, typer.Option(help="size of a pixel in units of the bounding box")
+    ] = 250,
+    crs: str = "EPSG:3413",
+    ts: int = 1683675557694,
+    format: str = "image/tiff",
+    validate: Annotated[bool, typer.Option(help="validate the image")] = True,
+):
+    result = load_(
+        datetime=datetime,
+        wrap=wrap,
+        satellite=satellite,
+        kind=kind,
+        bbox=bbox,
+        scale=scale,
+        crs=crs,
+        ts=ts,
+        format=format,
+        validate=validate,
+    )
+
+    with open(outfile, "wb") as f:
+        f.write(result.content)
+
+    return
+
+
+class KernelType(str, Enum):
+    diamond = "diamond"
+    ellipse = "ellipse"
+
+
+@app.command()
+def process(
+    truecolorimg: Annotated[Path, typer.Argument()],
+    cloudimg: Annotated[Path, typer.Argument()],
+    landmask: Annotated[Path, typer.Argument()],
+    outdir: Annotated[Path, typer.Argument()],
+    save_figs: Annotated[bool, typer.Option()] = True,
+    out_prefix: Annotated[
+        str, typer.Option(help="string to prepend to filenames")
+    ] = "",
+    itmax: Annotated[
+        int,
+        typer.Option(..., "--itmax", help="maximum number of iterations for erosion"),
+    ] = 8,
+    itmin: Annotated[
+        int,
+        typer.Option(..., "--itmin", help="minimum number of iterations for erosion"),
+    ] = 3,
+    step: Annotated[int, typer.Option(..., "--step")] = -1,
+    kernel_type: Annotated[
+        KernelType, typer.Option(..., "--kernel-type")
+    ] = KernelType.diamond,
+    kernel_size: Annotated[int, typer.Option(..., "--kernel-size")] = 1,
+    date: Annotated[Optional[datetime], typer.Option()] = None,
+):
+
+    preprocess_b(
+        ftci=truecolorimg,
+        fcloud=cloudimg,
+        fland=landmask,
+        itmax=itmax,
+        itmin=itmin,
+        step=step,
+        erosion_kernel_type=kernel_type,
+        erosion_kernel_size=kernel_size,
+        save_figs=save_figs,
+        save_direc=outdir,
+        fname_prefix=out_prefix,
+        date=date,
+    )
+
+    return
 
 
 @dataclass
@@ -152,91 +247,6 @@ def process_batch(
         # Wait for all threads to complete
         for future in futures:
             future.result()
-
-
-@app.command()
-def load(
-    outfile: Annotated[Path, typer.Argument()],
-    datetime: str = "2016-07-01T00:00:00Z",
-    wrap: str = "day",
-    satellite: Satellite = Satellite.terra,
-    kind: ImageType = ImageType.truecolor,
-    bbox: str = "-2334051.0214676396,-414387.78951688844,-1127689.8419350237,757861.8364224486",
-    scale: Annotated[
-        int, typer.Option(help="size of a pixel in units of the bounding box")
-    ] = 250,
-    crs: str = "EPSG:3413",
-    ts: int = 1683675557694,
-    format: str = "image/tiff",
-    validate: Annotated[bool, typer.Option(help="validate the image")] = True,
-):
-
-    result = load_(
-        datetime=datetime,
-        wrap=wrap,
-        satellite=satellite,
-        kind=kind,
-        bbox=bbox,
-        scale=scale,
-        crs=crs,
-        ts=ts,
-        format=format,
-        validate=validate,
-    )
-
-    with open(outfile, "wb") as f:
-        f.write(result.content)
-
-    return
-
-
-class KernelType(str, Enum):
-    diamond = "diamond"
-    ellipse = "ellipse"
-
-
-@app.command()
-def process(
-    truecolorimg: Annotated[Path, typer.Argument()],
-    cloudimg: Annotated[Path, typer.Argument()],
-    landmask: Annotated[Path, typer.Argument()],
-    outdir: Annotated[Path, typer.Argument()],
-    save_figs: Annotated[bool, typer.Option()] = True,
-    out_prefix: Annotated[
-        str, typer.Option(help="string to prepend to filenames")
-    ] = "",
-    itmax: Annotated[
-        int,
-        typer.Option(..., "--itmax", help="maximum number of iterations for erosion"),
-    ] = 8,
-    itmin: Annotated[
-        int,
-        typer.Option(..., "--itmin", help="minimum number of iterations for erosion"),
-    ] = 3,
-    step: Annotated[int, typer.Option(..., "--step")] = -1,
-    kernel_type: Annotated[
-        KernelType, typer.Option(..., "--kernel-type")
-    ] = KernelType.diamond,
-    kernel_size: Annotated[int, typer.Option(..., "--kernel-size")] = 1,
-    date: Annotated[Optional[datetime], typer.Option()] = None,
-):
-
-    preprocess_b(
-        ftci=truecolorimg,
-        fcloud=cloudimg,
-        fland=landmask,
-        itmax=itmax,
-        itmin=itmin,
-        step=step,
-        erosion_kernel_type=kernel_type,
-        erosion_kernel_size=kernel_size,
-        save_figs=save_figs,
-        save_direc=outdir,
-        fname_prefix=out_prefix,
-        date=date,
-    )
-
-    return
 
 
 @app.command()

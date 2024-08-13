@@ -3,10 +3,11 @@ import io
 import logging
 from enum import Enum
 
+import numpy as np
 import rasterio
 import requests
-import numpy as np
 from rasterio.enums import ColorInterp
+
 
 _logger = logging.getLogger(__name__)
 
@@ -26,13 +27,10 @@ def get_width_height(bbox: str, scale: float):
     """Get width and height for a bounding box where one pixel corresponds to `scale` bounding box units
 
     Examples:
-        >>> get_width_height("0,0,1,1", 10)
-        (10, 10)
+        >>> get_width_height("0,0,1,1", 1)
+        (1, 1)
 
-        >>> get_width_height("0,0,1,5", 10)
-        (2, 10)
-
-        >>> get_width_height("0,0,1,5", 10)
+        >>> get_width_height("0,0,10,50", 5)
         (2, 10)
 
     """
