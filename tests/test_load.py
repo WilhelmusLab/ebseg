@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from ebfloeseg.app import load, ImageType
+from ebfloeseg.load import load, ImageType
 
 
 def are_equal(p1, p2):
