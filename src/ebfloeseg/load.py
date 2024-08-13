@@ -1,5 +1,5 @@
-from collections import namedtuple
 import logging
+from collections import namedtuple
 from enum import Enum
 from pathlib import Path
 from typing import Annotated
