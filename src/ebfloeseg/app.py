@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import ast
+from collections import namedtuple
 import logging
 import tomllib
 from concurrent.futures import ProcessPoolExecutor
@@ -10,6 +11,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Annotated, Optional
 
+import click
 import pandas
 import typer
 
@@ -48,6 +50,21 @@ def main(
     logging.basicConfig(level=level)
     return
 
+BBox = namedtuple("BBox", ["x1", "y1", "x2", "y2"])
+
+class BBoxParser(click.ParamType):
+    name = "X1,Y1,X2,Y2"
+
+    def convert(self, value, param, ctx):
+        raw_value = ast.literal_eval(value)
+        value = BBox(*raw_value)
+        return value
+
+def bbox_parser(input_)-> BBox:
+    raw_value = ast.literal_eval(input_)
+    value = BBox(*raw_value)
+    return value
+
 
 @app.command()
 def load(
@@ -57,9 +74,14 @@ def load(
     satellite: Satellite = Satellite.terra,
     kind: ImageType = ImageType.truecolor,
     bbox: Annotated[
-        str,
-        typer.Option(parser=ast.literal_eval),
-    ] = "-2334051.0214676396,-414387.78951688844,-1127689.8419350237,757861.8364224486",
+        BBox,
+        typer.Option(parser=bbox_parser),
+    ] = (-2334051.0214676396,-414387.78951688844,-1127689.8419350237,757861.8364224486) ,
+
+    bbox2: Annotated[
+        BBox,
+        typer.Option(click_type=BBoxParser()),
+    ] = (-2334051.0214676396,-414387.78951688844,-1127689.8419350237,757861.8364224486) ,
     scale: Annotated[
         int, typer.Option(help="size of a pixel in units of the bounding box")
     ] = 250,
