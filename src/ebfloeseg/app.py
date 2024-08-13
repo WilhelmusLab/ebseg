@@ -9,8 +9,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Annotated, Optional
 
-import typer
 import pandas
+import typer
 
 from ebfloeseg.load import ImageType
 from ebfloeseg.load import load as load_
