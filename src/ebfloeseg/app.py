@@ -72,7 +72,7 @@ def load(
     format: str = "image/tiff",
 ):
     _logger.debug(locals())
-    
+
     load_(
         outfile=outfile,
         datetime=datetime,
@@ -119,7 +119,7 @@ def process(
     date: Annotated[Optional[datetime], typer.Option()] = None,
 ):
     _logger.debug(locals())
-    
+
     preprocess_b(
         ftci=truecolorimg,
         fcloud=cloudimg,
