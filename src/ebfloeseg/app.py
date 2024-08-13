@@ -93,13 +93,11 @@ def process(
     ] = "",
     itmax: Annotated[
         int,
-        typer.Option(..., "--itmax",
-                     help="maximum number of iterations for erosion"),
+        typer.Option(..., "--itmax", help="maximum number of iterations for erosion"),
     ] = 8,
     itmin: Annotated[
         int,
-        typer.Option(..., "--itmin",
-                     help="minimum number of iterations for erosion"),
+        typer.Option(..., "--itmin", help="minimum number of iterations for erosion"),
     ] = 3,
     step: Annotated[int, typer.Option(..., "--step")] = -1,
     kernel_type: Annotated[
