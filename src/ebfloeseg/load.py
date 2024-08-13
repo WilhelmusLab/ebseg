@@ -34,6 +34,20 @@ def get_width_height(bbox: str, scale: float):
     return width, height
 
 
+def logger_config(debug: bool, verbose: bool, quiet: bool):
+    if debug:
+        level = logging.DEBUG
+    elif verbose:
+        level = logging.INFO
+    elif quiet:
+        level = logging.ERROR
+    else:
+        level = logging.WARNING
+
+    logging.basicConfig(level=level)
+    return
+
+
 app = typer.Typer()
 
 
@@ -60,16 +74,7 @@ def main(
         bool, typer.Option(help="make the program much more talkative")
     ] = False,
 ):
-    if debug:
-        level = logging.DEBUG
-    elif verbose:
-        level = logging.INFO
-    elif quiet:
-        level = logging.ERROR
-    else:
-        level = logging.WARNING
-
-    logging.basicConfig(level=level)
+    logger_config(debug, verbose, quiet)
 
     match kind:
         case ImageType.truecolor:
