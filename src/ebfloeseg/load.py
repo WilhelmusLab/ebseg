@@ -96,6 +96,15 @@ class DataSet:
     scale: int
     crs: str
     ts: int
+    
+    def __post_init__(self):
+        """ensure that the fields are of the correct type"""
+        if not isinstance(self.satellite, Satellite):
+            self.satellite = Satellite(self.satellite)
+        if not isinstance(self.kind, ImageType):
+            self.kind = ImageType(self.kind)
+        if not isinstance(self.bbox, BoundingBox):
+            self.bbox = BoundingBox(*self.bbox)
 
 
 ExampleDataSetBeaufortSea = DataSet(
