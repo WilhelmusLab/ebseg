@@ -42,7 +42,7 @@ def rescale(x1: int | float, x2: int | float, scale: int | float) -> int:
     return rescaled_length
 
 
-def get_width_height(
+def _get_width_height(
     bbox: BoundingBox,
     scale: int | float,
 ) -> tuple[int, int]:
@@ -118,7 +118,7 @@ def load(
             msg = "satellite=%s and image kind=%s not supported" % (satellite, kind)
             raise NotImplementedError(msg)
 
-    width, height = get_width_height(bbox, scale)
+    width, height = _get_width_height(bbox, scale)
     _logger.info("Width: %s Height: %s" % (width, height))
 
     url = f"https://wvs.earthdata.nasa.gov/api/v1/snapshot"
