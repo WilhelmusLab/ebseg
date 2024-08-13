@@ -9,10 +9,11 @@ from enum import Enum
 from pathlib import Path
 from typing import Annotated, Optional
 
-import requests
 import typer
 import pandas
 
+from ebfloeseg.load import ImageType, Satellite
+from ebfloeseg.load import load as load_
 from ebfloeseg.masking import create_land_mask
 from ebfloeseg.preprocess import preprocess, preprocess_b
 
@@ -24,18 +25,107 @@ app = typer.Typer(name=name, add_completion=False)
 
 @app.callback()
 def main(
-    quiet: Annotated[bool, typer.Option()] = False,
-    verbose: Annotated[bool, typer.Option()] = False,
-    debug: Annotated[bool, typer.Option()] = False,
+    quiet: Annotated[
+        bool, typer.Option(help="make the program less talkative")
+    ] = False,
+    verbose: Annotated[
+        bool, typer.Option(help="make the program more talkative")
+    ] = False,
+    debug: Annotated[
+        bool, typer.Option(help="make the program much more talkative")
+    ] = False,
 ):
     if debug:
-        logging.basicConfig(level=logging.DEBUG)
+        level = logging.DEBUG
     elif verbose:
-        logging.basicConfig(level=logging.INFO)
+        level = logging.INFO
     elif quiet:
-        logging.basicConfig(level=logging.ERROR)
+        level = logging.ERROR
     else:
-        logging.basicConfig(level=logging.WARNING)
+        level = logging.WARNING
+
+    logging.basicConfig(level=level)
+    return
+
+
+@app.command()
+def load(
+    outfile: Annotated[Path, typer.Argument()],
+    datetime: str = "2016-07-01T00:00:00Z",
+    wrap: str = "day",
+    satellite: Satellite = Satellite.terra,
+    kind: ImageType = ImageType.truecolor,
+    bbox: str = "-2334051.0214676396,-414387.78951688844,-1127689.8419350237,757861.8364224486",
+    scale: Annotated[
+        int, typer.Option(help="size of a pixel in units of the bounding box")
+    ] = 250,
+    crs: str = "EPSG:3413",
+    ts: int = 1683675557694,
+    format: str = "image/tiff",
+):
+    load_(
+        outfile=outfile,
+        datetime=datetime,
+        wrap=wrap,
+        satellite=satellite,
+        kind=kind,
+        bbox=bbox,
+        scale=scale,
+        crs=crs,
+        ts=ts,
+        format=format,
+    )
+
+    return
+
+
+class KernelType(str, Enum):
+    diamond = "diamond"
+    ellipse = "ellipse"
+
+
+@app.command()
+def process(
+    truecolorimg: Annotated[Path, typer.Argument()],
+    cloudimg: Annotated[Path, typer.Argument()],
+    landmask: Annotated[Path, typer.Argument()],
+    outdir: Annotated[Path, typer.Argument()],
+    save_figs: Annotated[bool, typer.Option()] = True,
+    out_prefix: Annotated[
+        str, typer.Option(help="string to prepend to filenames")
+    ] = "",
+    itmax: Annotated[
+        int,
+        typer.Option(..., "--itmax", help="maximum number of iterations for erosion"),
+    ] = 8,
+    itmin: Annotated[
+        int,
+        typer.Option(..., "--itmin", help="minimum number of iterations for erosion"),
+    ] = 3,
+    step: Annotated[int, typer.Option(..., "--step")] = -1,
+    kernel_type: Annotated[
+        KernelType, typer.Option(..., "--kernel-type")
+    ] = KernelType.diamond,
+    kernel_size: Annotated[int, typer.Option(..., "--kernel-size")] = 1,
+    date: Annotated[Optional[datetime], typer.Option()] = None,
+):
+
+    preprocess_b(
+        ftci=truecolorimg,
+        fcloud=cloudimg,
+        fland=landmask,
+        itmax=itmax,
+        itmin=itmin,
+        step=step,
+        erosion_kernel_type=kernel_type,
+        erosion_kernel_size=kernel_size,
+        save_figs=save_figs,
+        save_direc=outdir,
+        fname_prefix=out_prefix,
+        date=date,
+    )
+
+    return
 
 
 @dataclass
@@ -151,163 +241,6 @@ def process_batch(
         # Wait for all threads to complete
         for future in futures:
             future.result()
-
-
-class ImageType(str, Enum):
-    truecolor = "truecolor"
-    cloud = "cloud"
-    landmask = "landmask"
-
-
-class Satellite(str, Enum):
-    terra = "terra"
-    aqua = "aqua"
-
-
-def get_width_height(bbox: str, scale: float):
-    """Get width and height for a bounding box where one pixel corresponds to `scale` bounding box units
-
-    Examples:
-        >>> get_width_height("0,0,1,1", 10)
-        (10, 10)
-
-        >>> get_width_height("0,0,1,5", 10)
-        (2, 10)
-
-        >>> get_width_height("0,0,1,5", 10)
-        (2, 10)
-
-    """
-    x1, y1, x2, y2 = [float(n) for n in bbox.split(",")]
-    x_length = abs(x2 - x1)
-    y_length = abs(y2 - y1)
-
-    width, height = int(x_length / scale), int(y_length / scale)
-    return width, height
-
-
-@app.command()
-def load(
-    outfile: Annotated[Path, typer.Argument()],
-    datetime: str = "2016-07-01T00:00:00Z",
-    wrap: str = "day",
-    satellite: Satellite = Satellite.terra,
-    kind: ImageType = ImageType.truecolor,
-    bbox: str = "-2334051.0214676396,-414387.78951688844,-1127689.8419350237,757861.8364224486",
-    scale: Annotated[
-        int, typer.Option(help="size of a pixel in units of the bounding box")
-    ] = 250,
-    crs: str = "EPSG:3413",
-    ts: int = 1683675557694,
-    format: str = "image/tiff",
-):
-
-    match (satellite, kind):
-        case (Satellite.terra, ImageType.truecolor):
-            layers = "MODIS_Terra_CorrectedReflectance_TrueColor"
-        case (Satellite.terra, ImageType.cloud):
-            layers = "MODIS_Terra_Cloud_Fraction_Day"
-        case (Satellite.aqua, ImageType.truecolor):
-            layers = "MODIS_Aqua_CorrectedReflectance_TrueColor"
-        case (Satellite.aqua, ImageType.cloud):
-            layers = "MODIS_Aqua_Cloud_Fraction_Day"
-        case (_, ImageType.landmask):
-            layers = "OSM_Land_Mask"
-        case _:
-            msg = "satellite=%s and image kind=%s not supported" % (satellite, kind)
-            raise NotImplementedError(msg)
-
-    width, height = get_width_height(bbox, scale)
-    _logger.info("Width: %s Height: %s" % (width, height))
-
-    url = f"https://wvs.earthdata.nasa.gov/api/v1/snapshot"
-    payload = {
-        "REQUEST": "GetSnapshot",
-        "TIME": datetime,
-        "BBOX": bbox,
-        "CRS": crs,
-        "LAYERS": layers,
-        "WRAP": wrap,
-        "FORMAT": format,
-        "WIDTH": width,
-        "HEIGHT": height,
-        "ts": ts,
-    }
-    r = requests.get(url, params=payload, allow_redirects=True)
-    r.raise_for_status()
-
-    with open(outfile, "wb") as f:
-        f.write(r.content)
-
-    return
-
-
-class KernelType(str, Enum):
-    diamond = "diamond"
-    ellipse = "ellipse"
-
-
-@app.command()
-def process(
-    truecolorimg: Annotated[Path, typer.Argument()],
-    cloudimg: Annotated[Path, typer.Argument()],
-    landmask: Annotated[Path, typer.Argument()],
-    outdir: Annotated[Path, typer.Argument()],
-    save_figs: Annotated[bool, typer.Option()] = True,
-    out_prefix: Annotated[
-        str, typer.Option(help="string to prepend to filenames")
-    ] = "",
-    itmax: Annotated[
-        int,
-        typer.Option(..., "--itmax", help="maximum number of iterations for erosion"),
-    ] = 8,
-    itmin: Annotated[
-        int,
-        typer.Option(..., "--itmin", help="minimum number of iterations for erosion"),
-    ] = 3,
-    step: Annotated[int, typer.Option(..., "--step")] = -1,
-    kernel_type: Annotated[
-        KernelType, typer.Option(..., "--kernel-type")
-    ] = KernelType.diamond,
-    kernel_size: Annotated[int, typer.Option(..., "--kernel-size")] = 1,
-    date: Annotated[Optional[datetime], typer.Option()] = None,
-):
-
-    preprocess_b(
-        ftci=truecolorimg,
-        fcloud=cloudimg,
-        fland=landmask,
-        itmax=itmax,
-        itmin=itmin,
-        step=step,
-        erosion_kernel_type=kernel_type,
-        erosion_kernel_size=kernel_size,
-        save_figs=save_figs,
-        save_direc=outdir,
-        fname_prefix=out_prefix,
-        date=date,
-    )
-
-    return
-
-
-@app.command()
-def get_bbox(
-    datafile: Annotated[Path, typer.Argument()],
-    index: Annotated[str, typer.Argument()],
-    index_col: Annotated[str, typer.Option()] = "location",
-    colnames: Annotated[list[str], typer.Option()] = [
-        "left_x",
-        "lower_y",
-        "right_x",
-        "top_y",
-    ],
-    separator: Annotated[str, typer.Option()] = ",",
-):
-
-    df = pandas.read_csv(datafile, index_col=index_col)
-    output = separator.join(str(s) for s in list(df.loc[index][colnames]))
-    print(output)
 
 
 if __name__ == "__main__":

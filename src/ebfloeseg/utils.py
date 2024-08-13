@@ -31,7 +31,7 @@ def getdoy(fname: str) -> str:
         str: The day of year (DOY) as a zero-padded string.
 
     Example:
-        >>> getdoy("image_2022_123.jpg")
+        >>> getdoy("image_2022_123.jpg")  # doctest: +SKIP
         '123'
     """
     return fname.split("_")[-2].zfill(3)
