@@ -23,19 +23,27 @@ app = typer.Typer(name=name, add_completion=False)
 
 @app.callback()
 def main(
-    quiet: Annotated[bool, typer.Option()] = False,
-    verbose: Annotated[bool, typer.Option()] = False,
-    debug: Annotated[bool, typer.Option()] = False,
+    quiet: Annotated[
+        bool, typer.Option(help="make the program less talkative")
+    ] = False,
+    verbose: Annotated[
+        bool, typer.Option(help="make the program more talkative")
+    ] = False,
+    debug: Annotated[
+        bool, typer.Option(help="make the program much more talkative")
+    ] = False,
 ):
     if debug:
-        logging.basicConfig(level=logging.DEBUG)
+        level = logging.DEBUG
     elif verbose:
-        logging.basicConfig(level=logging.INFO)
+        level = logging.INFO
     elif quiet:
-        logging.basicConfig(level=logging.ERROR)
+        level = logging.ERROR
     else:
-        logging.basicConfig(level=logging.WARNING)
+        level = logging.WARNING
 
+    logging.basicConfig(level=level)
+    return
 
 @dataclass
 class ConfigParams:
@@ -162,13 +170,10 @@ def get_width_height(bbox: str, scale: float):
     """Get width and height for a bounding box where one pixel corresponds to `scale` bounding box units
 
     Examples:
-        >>> get_width_height("0,0,1,1", 10)
-        (10, 10)
+        >>> get_width_height("0,0,1,1", 1)
+        (1, 1)
 
-        >>> get_width_height("0,0,1,5", 10)
-        (2, 10)
-
-        >>> get_width_height("0,0,1,5", 10)
+        >>> get_width_height("0,0,10,50", 5)
         (2, 10)
 
     """
