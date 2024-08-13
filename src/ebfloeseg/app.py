@@ -25,13 +25,13 @@ app = typer.Typer(name=name, add_completion=False)
 @app.callback()
 def main(
     quiet: Annotated[
-        bool, typer.Option(help="make the program less talkative")
+        bool, typer.Option(help="Make the program less talkative.")
     ] = False,
     verbose: Annotated[
-        bool, typer.Option(help="make the program more talkative")
+        bool, typer.Option(help="Make the program more talkative.")
     ] = False,
     debug: Annotated[
-        bool, typer.Option(help="make the program much more talkative")
+        bool, typer.Option(help="Make the program much more talkative.")
     ] = False,
 ):
     if debug:
@@ -47,7 +47,7 @@ def main(
     return
 
 
-@app.command()
+@app.command(help="Download an image.")
 def load(
     outfile: Annotated[Path, typer.Argument()],
     datetime: str = "2016-07-01T00:00:00Z",
@@ -81,7 +81,7 @@ class KernelType(str, Enum):
     ellipse = "ellipse"
 
 
-@app.command()
+@app.command(help="Preprocess a single set of images.")
 def process(
     truecolorimg: Annotated[Path, typer.Argument()],
     cloudimg: Annotated[Path, typer.Argument()],
@@ -93,11 +93,13 @@ def process(
     ] = "",
     itmax: Annotated[
         int,
-        typer.Option(..., "--itmax", help="maximum number of iterations for erosion"),
+        typer.Option(..., "--itmax",
+                     help="maximum number of iterations for erosion"),
     ] = 8,
     itmin: Annotated[
         int,
-        typer.Option(..., "--itmin", help="minimum number of iterations for erosion"),
+        typer.Option(..., "--itmin",
+                     help="minimum number of iterations for erosion"),
     ] = 3,
     step: Annotated[int, typer.Option(..., "--step")] = -1,
     kernel_type: Annotated[
@@ -179,7 +181,7 @@ def parse_config_file(config_file: Path) -> ConfigParams:
 
 
 @app.command(
-    help="TODO: add description",
+    help="Preprocess a directory of images.",
     epilog=f"Example: {name} --data-direc /path/to/data --save_figs --save-direc /path/to/save --land /path/to/landfile",
 )
 def process_batch(
