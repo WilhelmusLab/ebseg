@@ -24,13 +24,14 @@ class Satellite(str, Enum):
     terra = "terra"
     aqua = "aqua"
 
+
 def _rescale(x1: int | float, x2: int | float, scale: int | float) -> int:
     """
-    
+
     Examples:
         >>> _rescale(0, 1, 1)
         1
-        
+
         >>> _rescale(0, 10, 10)
         1
 
