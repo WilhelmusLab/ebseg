@@ -11,7 +11,8 @@ from typing import Annotated, Optional
 
 import typer
 
-from ebfloeseg.load import ImageType, load as load_
+from ebfloeseg.load import ImageType
+from ebfloeseg.load import load as load_
 from ebfloeseg.masking import create_land_mask
 from ebfloeseg.preprocess import preprocess, preprocess_b
 
