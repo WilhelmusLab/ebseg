@@ -121,7 +121,7 @@ def load(
                     img
                 ), "alpha channel is empty"
             case ImageType.landmask:
-                # Don't check for image and not empty – an empty landmask is very reasonable
+                # An empty landmask is reasonable, so don't throw an error if it is
                 pass
 
     return LoadResult(r.content, img)
