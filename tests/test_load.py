@@ -22,7 +22,7 @@ def are_equal(b1: BytesIO, p2: Path):
 @pytest.mark.parametrize("kind", ImageType)
 def test_load_runs_in_specific_case_with_validation(kind):
     result = load(kind=kind, scale=10000)
-    data = BytesIO(result["content"])
+    data = BytesIO(result.content)
     assert are_equal(data, Path("tests/load/") / f"{kind.value}.tiff")
 
 
