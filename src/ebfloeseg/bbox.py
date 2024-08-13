@@ -6,6 +6,7 @@ import click
 
 BBox = namedtuple("BBox", ["x1", "y1", "x2", "y2"])
 
+
 class BBoxParser(click.ParamType):
     name = "X1,Y1,X2,Y2"
 
