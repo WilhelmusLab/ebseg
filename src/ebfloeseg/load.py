@@ -35,9 +35,6 @@ def get_width_height(bbox: str, scale: float):
     return width, height
 
 
-LoadResult = namedtuple("LoadResult", ["content", "img"])
-
-
 def load(
     outfile: Path,
     datetime: str = "2016-07-01T00:00:00Z",
@@ -48,7 +45,7 @@ def load(
     crs: str = "EPSG:3413",
     ts: int = 1683675557694,
     format: str = "image/tiff",
-) -> LoadResult:
+):
 
     match kind:
         case ImageType.truecolor:
