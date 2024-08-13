@@ -106,7 +106,7 @@ def load(
     datetime: str = ExampleDataSetBeaufortSea.datetime,
     wrap: str = ExampleDataSetBeaufortSea.wrap,
     satellite: Satellite = ExampleDataSetBeaufortSea.satellite,
-    kind: ImageType = ImageType.truecolor,
+    kind: ImageType = ExampleDataSetBeaufortSea.kind,
     bbox: BoundingBox = ExampleDataSetBeaufortSea.bbox,
     scale: int = ExampleDataSetBeaufortSea.scale,
     crs: str = ExampleDataSetBeaufortSea.crs,
