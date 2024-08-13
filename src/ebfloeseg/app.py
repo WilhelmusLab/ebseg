@@ -71,6 +71,8 @@ def load(
     ts: int = 1683675557694,
     format: str = "image/tiff",
 ):
+    _logger.debug(locals())
+    
     load_(
         outfile=outfile,
         datetime=datetime,
@@ -116,7 +118,8 @@ def process(
     kernel_size: Annotated[int, typer.Option(..., "--kernel-size")] = 1,
     date: Annotated[Optional[datetime], typer.Option()] = None,
 ):
-
+    _logger.debug(locals())
+    
     preprocess_b(
         ftci=truecolorimg,
         fcloud=cloudimg,
@@ -204,6 +207,7 @@ def process_batch(
         help="The maximum number of workers. If None, uses all available processors.",
     ),
 ):
+    _logger.debug(locals())
 
     args = parse_config_file(config_file)
 
