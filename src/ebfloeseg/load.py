@@ -1,11 +1,8 @@
 import logging
-from collections import namedtuple
 from enum import Enum
 from pathlib import Path
-from typing import Annotated
 
 import requests
-import typer
 
 _logger = logging.getLogger(__name__)
 
