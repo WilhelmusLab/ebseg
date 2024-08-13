@@ -9,8 +9,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Annotated, Optional
 
-import typer
 import pandas
+import typer
 
 from ebfloeseg.load import ImageType, Satellite
 from ebfloeseg.load import load as load_
@@ -20,19 +20,29 @@ from ebfloeseg.preprocess import preprocess, preprocess_b
 _logger = logging.getLogger(__name__)
 
 name = "fsdproc"
-app = typer.Typer(name=name, add_completion=False)
+app = typer.Typer(
+    name=name,
+    add_completion=False,
+    help="""Run the floe size distribution processing by Buckley, E. (2024)
+    
+    Buckley, E. M., Cañuelas, L., Timmermans, M.-L., and Wilhelmus, M. M.: 
+    Seasonal Evolution of the Sea Ice Floe Size Distribution 
+    from Two Decades of MODIS Data, EGUsphere [preprint], 
+    https://doi.org/10.5194/egusphere-2024-89, 2024.
+    """,
+)
 
 
 @app.callback()
 def main(
     quiet: Annotated[
-        bool, typer.Option(help="make the program less talkative")
+        bool, typer.Option(help="Make the program less talkative.")
     ] = False,
     verbose: Annotated[
-        bool, typer.Option(help="make the program more talkative")
+        bool, typer.Option(help="Make the program more talkative.")
     ] = False,
     debug: Annotated[
-        bool, typer.Option(help="make the program much more talkative")
+        bool, typer.Option(help="Make the program much more talkative.")
     ] = False,
 ):
     if debug:
@@ -48,7 +58,7 @@ def main(
     return
 
 
-@app.command()
+@app.command(help="Download an image.")
 def load(
     outfile: Annotated[Path, typer.Argument()],
     datetime: str = "2016-07-01T00:00:00Z",
@@ -63,6 +73,8 @@ def load(
     ts: int = 1683675557694,
     format: str = "image/tiff",
 ):
+    _logger.debug(locals())
+
     load_(
         outfile=outfile,
         datetime=datetime,
@@ -84,7 +96,7 @@ class KernelType(str, Enum):
     ellipse = "ellipse"
 
 
-@app.command()
+@app.command(help="Process a single set of true-color, cloud, and landmask images.")
 def process(
     truecolorimg: Annotated[Path, typer.Argument()],
     cloudimg: Annotated[Path, typer.Argument()],
@@ -109,6 +121,7 @@ def process(
     kernel_size: Annotated[int, typer.Option(..., "--kernel-size")] = 1,
     date: Annotated[Optional[datetime], typer.Option()] = None,
 ):
+    _logger.debug(locals())
 
     preprocess_b(
         ftci=truecolorimg,
@@ -182,7 +195,7 @@ def parse_config_file(config_file: Path) -> ConfigParams:
 
 
 @app.command(
-    help="TODO: add description",
+    help="Process a directory of images.",
     epilog=f"Example: {name} --data-direc /path/to/data --save_figs --save-direc /path/to/save --land /path/to/landfile",
 )
 def process_batch(
@@ -197,6 +210,7 @@ def process_batch(
         help="The maximum number of workers. If None, uses all available processors.",
     ),
 ):
+    _logger.debug(locals())
 
     args = parse_config_file(config_file)
 
