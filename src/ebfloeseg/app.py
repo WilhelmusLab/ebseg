@@ -9,15 +9,13 @@ from enum import Enum
 from pathlib import Path
 from typing import Annotated, Optional
 
-import typer
 import pandas
+import typer
 
 from ebfloeseg.load import ImageType, Satellite
 from ebfloeseg.load import load as load_
 from ebfloeseg.masking import create_land_mask
 from ebfloeseg.preprocess import preprocess, preprocess_b
-from ebfloeseg.load import load as load_
-from ebfloeseg.load import ImageType, Satellite
 
 _logger = logging.getLogger(__name__)
 
