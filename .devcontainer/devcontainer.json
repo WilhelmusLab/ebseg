@@ -25,7 +25,8 @@
 				"github.vscode-github-actions",
 				"analytic-signal.preview-tiff",
 				"ms-toolsai.jupyter",
-				"mechatroner.rainbow-csv"
+				"mechatroner.rainbow-csv",
+				"janisdd.vscode-edit-csv"
 			]
 		}
 	},

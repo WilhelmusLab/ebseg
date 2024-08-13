@@ -1,11 +1,11 @@
-from collections import namedtuple
 import io
 import logging
+from collections import namedtuple
 from enum import Enum
 
+import numpy as np
 import rasterio
 import requests
-import numpy as np
 from rasterio.enums import ColorInterp
 
 _logger = logging.getLogger(__name__)
@@ -26,13 +26,10 @@ def get_width_height(bbox: tuple[float, float, float, float] | str, scale: float
     """Get width and height for a bounding box where one pixel corresponds to `scale` bounding box units
 
     Examples:
-        >>> get_width_height("0,0,1,1", 10)
-        (10, 10)
+        >>> get_width_height("0,0,1,1", 1)
+        (1, 1)
 
-        >>> get_width_height("0,0,1,5", 10)
-        (2, 10)
-
-        >>> get_width_height("0,0,1,5", 10)
+        >>> get_width_height("0,0,10,50", 5)
         (2, 10)
 
     """
@@ -55,15 +52,19 @@ def image_not_empty(img: rasterio.DatasetReader):
     match img.colorinterp:
         case (ColorInterp.red, ColorInterp.green, ColorInterp.blue):
             red_c, green_c, blue_c = img.read()
-            return np.any(red_c) or np.any(green_c) or np.any(blue_c)
         case (ColorInterp.red, ColorInterp.green, ColorInterp.blue, ColorInterp.alpha):
-            red_c, green_c, blue_c, alpha_c = img.read()
-            return (np.any(red_c) or np.any(green_c) or np.any(blue_c)) and np.any(
-                alpha_c
-            )
+            red_c, green_c, blue_c, _ = img.read()
         case _:
             msg = "unknown dimensions %s" % img.colorinterp
             raise ValueError(msg)
+    return np.any(red_c) or np.any(green_c) or np.any(blue_c)
+
+
+def alpha_not_empty(img: rasterio.DatasetReader):
+    # check that the image isn't all zeros using img.read() and the .colorinterp field
+    alpha_index = img.colorinterp.index(ColorInterp.alpha)
+    alpha_c = img.read()[alpha_index]
+    return np.any(alpha_c)
 
 
 LoadResult = namedtuple("LoadResult", ["content", "img"])
@@ -124,7 +125,15 @@ def load(
     img = rasterio.open(io.BytesIO(r.content))
 
     if validate:
-        assert image_not_empty(img)
+        match (kind):
+            case ImageType.truecolor | ImageType.cloud:
+                assert image_not_empty(img), "image is empty"
+                assert ColorInterp.alpha not in img.colorinterp | alpha_not_empty(
+                    img
+                ), "alpha channel is empty"
+            case ImageType.landmask:
+                # An empty landmask is reasonable, nothing to validate here
+                pass
 
     return LoadResult(r.content, img)
 

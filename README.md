@@ -62,6 +62,7 @@ fsdproc load data/cld.tiff --kind cloud --satellite aqua
 To run the `cylc` workflow with the test data, run:
 ```bash
 cylc stop ebseg/*       # stops any currently running workflows
+cylc validate .         # check the cylc configuration
 cylc install . -n ebseg # installs the current version of the workflow
 cylc play ebseg         # runs the workflow
 cylc tui ebseg          # opens the text user interface
@@ -69,9 +70,13 @@ cylc tui ebseg          # opens the text user interface
 
 or on one line:
 ```bash
-cylc stop ebseg/* ; cylc install . && cylc play ebseg && cylc tui ebseg
+cylc stop ebseg/* ; cylc validate . & cylc install . && cylc play ebseg && cylc tui ebseg
 ```
 
+In some cases, if the installation fails, you might need to run `cylc clean` before reinstalling: 
+```bash
+cylc stop ebseg/*; cylc validate . & cylc clean ebseg/*; cylc install . && cylc play ebseg && cylc tui ebseg
+```
 
 ## OSCAR
 
