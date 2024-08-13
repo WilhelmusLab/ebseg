@@ -1,22 +1,40 @@
+import dataclasses
 from pathlib import Path
 from io import BytesIO
 
 import pytest
 import requests_mock
 
-from ebfloeseg.load import load, ImageType, Satellite
+from ebfloeseg.load import load, ImageType, Satellite, DataSet
 
 
 def are_equal(b1: BytesIO, p2):
     return b1.read() == Path(p2).read_bytes()
 
 
+ExampleDataSetBeaufortSea = DataSet(
+    datetime="2016-07-01T00:00:00Z",
+    wrap="day",
+    satellite=Satellite.terra,
+    kind=ImageType.truecolor,
+    scale=250,
+    bbox=(-2334051.0214676396,
+        -414387.78951688844,
+        -1127689.8419350237,
+        757861.8364224486),
+    crs="EPSG:3413",
+    ts=1683675557694,
+)
+
+
 @pytest.mark.smoke
 @pytest.mark.slow
 @pytest.mark.parametrize("kind", ImageType)
-def test_load(kind):
-    result = load(kind=kind, scale=10000)
-    data = BytesIO(result["content"])
+def test_load_check(kind):
+    kwargs = dataclasses.asdict(ExampleDataSetBeaufortSea)
+    kwargs.update(kind=kind, scale=10000)
+    result = load(**kwargs, format="image/tiff")
+    data = BytesIO(result.content)
     assert are_equal(data, Path("tests/load/") / f"{kind.value}.tiff")
 
 
