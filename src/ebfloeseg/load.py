@@ -121,10 +121,8 @@ def load(
                     img
                 ), "alpha channel is empty"
             case ImageType.landmask:
-                # Don't check for image not empty – an empty landmask is very reasonable
-                assert ColorInterp.alpha not in img.colorinterp | alpha_not_empty(
-                    img
-                ), "alpha channel is empty"
+                # Don't check for image and not empty – an empty landmask is very reasonable
+                pass
 
     return LoadResult(r.content, img)
 
