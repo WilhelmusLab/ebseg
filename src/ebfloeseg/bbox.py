@@ -19,36 +19,36 @@ class BoundingBoxParser(click.ParamType):
         """
         Examples:
             We can parse integers separated by commas:
-            >>> BBoxParser.convert("1,2,3,4")
-            BBox(x1=1, y1=2, x2=3, y2=4)
+            >>> BoundingBoxParser.convert("1,2,3,4")
+            BoundingBox(x1=1, y1=2, x2=3, y2=4)
 
             ..., commas and spaces:
-            >>> BBoxParser.convert("1, 2, 3, 4")
-            BBox(x1=1, y1=2, x2=3, y2=4)
+            >>> BoundingBoxParser.convert("1, 2, 3, 4")
+            BoundingBox(x1=1, y1=2, x2=3, y2=4)
 
             ..., surrounded by parentheses:
-            >>> BBoxParser.convert("(1,2,3,4)")
-            BBox(x1=1, y1=2, x2=3, y2=4)
+            >>> BoundingBoxParser.convert("(1,2,3,4)")
+            BoundingBox(x1=1, y1=2, x2=3, y2=4)
 
             ..., surrounded by parentheses and with spaces:
-            >>> BBoxParser.convert("(1, 2, 3, 4)")
-            BBox(x1=1, y1=2, x2=3, y2=4)
+            >>> BoundingBoxParser.convert("(1, 2, 3, 4)")
+            BoundingBox(x1=1, y1=2, x2=3, y2=4)
 
             ..., surrounded by square brackets and with spaces:
-            >>> BBoxParser.convert("[1, 2, 3, 4]")
-            BBox(x1=1, y1=2, x2=3, y2=4)
+            >>> BoundingBoxParser.convert("[1, 2, 3, 4]")
+            BoundingBox(x1=1, y1=2, x2=3, y2=4)
 
             ..., surrounded by square brackets and with spaces:
-            >>> BBoxParser.convert("[1, 2, 3, 4]")
-            BBox(x1=1, y1=2, x2=3, y2=4)
+            >>> BoundingBoxParser.convert("[1, 2, 3, 4]")
+            BoundingBox(x1=1, y1=2, x2=3, y2=4)
 
             We can do the same with floats:
-            >>> BBoxParser.convert("1.2,2.4,3,4")
-            BBox(x1=1.2, y1=2.4, x2=3, y2=4)
+            >>> BoundingBoxParser.convert("1.2,2.4,3,4")
+            BoundingBox(x1=1.2, y1=2.4, x2=3, y2=4)
 
             We can do the same with floats:
-            >>> BBoxParser.convert("(1.2,  2.4, 3, 4)")
-            BBox(x1=1.2, y1=2.4, x2=3, y2=4)
+            >>> BoundingBoxParser.convert("(1.2,  2.4, 3, 4)")
+            BoundingBox(x1=1.2, y1=2.4, x2=3, y2=4)
 
 
 
