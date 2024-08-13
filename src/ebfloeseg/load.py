@@ -23,17 +23,17 @@ class Satellite(str, Enum):
     terra = "terra"
     aqua = "aqua"
 
-def rescale(x1: int | float, x2: int | float, scale: int | float) -> int:
+def _rescale(x1: int | float, x2: int | float, scale: int | float) -> int:
     """
     
     Examples:
-        >>> rescale(0, 1, 1)
+        >>> _rescale(0, 1, 1)
         1
         
-        >>> rescale(0, 10, 10)
+        >>> _rescale(0, 10, 10)
         1
 
-        >>> rescale(0, 100, 10)
+        >>> _rescale(0, 100, 10)
         10
 
     """
@@ -56,8 +56,8 @@ def _get_width_height(
         (2, 10)
 
     """
-    width = rescale(bbox.x1, bbox.x2, scale)
-    height = rescale(bbox.y1, bbox.y2, scale)
+    width = _rescale(bbox.x1, bbox.x2, scale)
+    height = _rescale(bbox.y1, bbox.y2, scale)
     return width, height
 
 
