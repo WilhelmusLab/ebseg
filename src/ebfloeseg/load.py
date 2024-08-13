@@ -1,8 +1,8 @@
+from dataclasses import dataclass
 import io
 import logging
 from collections import namedtuple
 from enum import Enum
-from typing import NamedTuple
 
 import numpy as np
 import rasterio
@@ -73,7 +73,8 @@ def alpha_not_empty(img: rasterio.DatasetReader):
 LoadResult = namedtuple("LoadResult", ["content", "img"])
 
 
-class DataSet(NamedTuple):
+@dataclass
+class DataSet:
     datetime: str
     wrap: str
     satellite: Satellite
