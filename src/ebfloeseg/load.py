@@ -1,10 +1,11 @@
 from collections import namedtuple
-import io
 import logging
 from enum import Enum
+from pathlib import Path
+from typing import Annotated
 
-import rasterio
 import requests
+import typer
 
 _logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ LoadResult = namedtuple("LoadResult", ["content", "img"])
 
 
 def load(
+    outfile: Path,
     datetime: str = "2016-07-01T00:00:00Z",
     wrap: str = "day",
     kind: ImageType = ImageType.truecolor,
@@ -75,9 +77,10 @@ def load(
     r = requests.get(url, params=payload, allow_redirects=True)
     r.raise_for_status()
 
-    img = rasterio.open(io.BytesIO(r.content))
+    with open(outfile, "wb") as f:
+        f.write(r.content)
 
-    return LoadResult(r.content, img)
+    return
 
 
 if __name__ == "__main__":

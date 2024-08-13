@@ -175,7 +175,8 @@ def load(
     ts: int = 1683675557694,
     format: str = "image/tiff",
 ):
-    result = load_(
+    load_(
+        outfile=outfile,
         datetime=datetime,
         wrap=wrap,
         kind=kind,
@@ -185,9 +186,6 @@ def load(
         ts=ts,
         format=format,
     )
-
-    with open(outfile, "wb") as f:
-        f.write(result.content)
 
     return
 
