@@ -23,29 +23,41 @@ class Satellite(str, Enum):
     terra = "terra"
     aqua = "aqua"
 
+def rescale(x1: int | float, x2: int | float, scale: int | float) -> int:
+    """
+    
+    Examples:
+        >>> rescale(0, 1, 1)
+        1
+        
+        >>> rescale(0, 10, 10)
+        1
 
-def get_width_height(bbox: BoundingBox | str, scale: float):
+        >>> rescale(0, 100, 10)
+        10
+
+    """
+    length = abs(x2 - x1)
+    rescaled_length = int(length / scale)
+    return rescaled_length
+
+
+def get_width_height(
+    bbox: BoundingBox,
+    scale: int | float,
+) -> tuple[int, int]:
     """Get width and height for a bounding box where one pixel corresponds to `scale` bounding box units
 
     Examples:
-        >>> get_width_height("0,0,1,1", 1)
+        >>> get_width_height(BoundingBox(0, 0, 1, 1), 1)
         (1, 1)
 
-        >>> get_width_height("0,0,10,50", 5)
+        >>> get_width_height(BoundingBox(0, 0, 10, 50), 5)
         (2, 10)
 
     """
-    if isinstance(bbox, str):
-        x1, y1, x2, y2 = [float(n) for n in bbox.split(",")]
-    elif isinstance(bbox, tuple):
-        x1, y1, x2, y2 = bbox
-    else:
-        msg = "type of %s not supported" % s
-        raise NotImplementedError(msg)
-    x_length = abs(x2 - x1)
-    y_length = abs(y2 - y1)
-
-    width, height = int(x_length / scale), int(y_length / scale)
+    width = rescale(bbox.x1, bbox.x2, scale)
+    height = rescale(bbox.y1, bbox.y2, scale)
     return width, height
 
 
@@ -77,7 +89,7 @@ def load(
     wrap: str = "day",
     satellite: Satellite = Satellite.terra,
     kind: ImageType = ImageType.truecolor,
-    bbox: tuple[float, float, float, float] = (
+    bbox: BoundingBox = BoundingBox(
         -2334051.0214676396,
         -414387.78951688844,
         -1127689.8419350237,
