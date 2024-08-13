@@ -7,7 +7,13 @@ import requests_mock
 from ebfloeseg.load import load, ImageType, Satellite
 
 
-def are_equal(b1: BytesIO, p2):
+def are_equal(b1: BytesIO, p2: Path):
+    """Check whether two files have identical bytes.
+
+    Arguments:
+        b1: io.BytesIO object
+        p2: path to a file to be compared with b1
+    """
     return b1.read() == Path(p2).read_bytes()
 
 

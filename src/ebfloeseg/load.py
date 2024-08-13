@@ -89,6 +89,7 @@ def load(
     format: str = "image/tiff",
     validate: bool = True,
 ) -> LoadResult:
+    """Load an image from the NASA Worldview Snapshots API"""
 
     match (satellite, kind):
         case (Satellite.terra, ImageType.truecolor):
