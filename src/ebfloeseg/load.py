@@ -1,4 +1,3 @@
-
 from collections import namedtuple
 import io
 import logging
@@ -8,6 +7,7 @@ import rasterio
 import requests
 
 _logger = logging.getLogger(__name__)
+
 
 class ImageType(str, Enum):
     truecolor = "truecolor"
@@ -32,7 +32,6 @@ def get_width_height(bbox: str, scale: float):
 
     width, height = int(x_length / scale), int(y_length / scale)
     return width, height
-
 
 
 LoadResult = namedtuple("LoadResult", ["content", "img"])

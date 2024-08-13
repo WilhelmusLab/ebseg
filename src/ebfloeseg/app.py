@@ -45,6 +45,7 @@ def main(
     logging.basicConfig(level=level)
     return
 
+
 @dataclass
 class ConfigParams:
     data_direc: Path
