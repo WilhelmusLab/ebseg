@@ -18,10 +18,12 @@ ExampleDataSetBeaufortSea = DataSet(
     satellite=Satellite.terra,
     kind=ImageType.truecolor,
     scale=250,
-    bbox=(-2334051.0214676396,
+    bbox=(
+        -2334051.0214676396,
         -414387.78951688844,
         -1127689.8419350237,
-        757861.8364224486),
+        757861.8364224486,
+    ),
     crs="EPSG:3413",
     ts=1683675557694,
 )
