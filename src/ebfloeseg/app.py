@@ -24,8 +24,11 @@ app = typer.Typer(
     add_completion=False,
     help="""Run the floe size distribution processing by Buckley, E. (2024)
     
-    Buckley, E. M., Cañuelas, L., Timmermans, M.-L., and Wilhelmus, M. M.: Seasonal Evolution of the Sea Ice Floe Size Distribution from Two Decades of MODIS Data, EGUsphere [preprint], https://doi.org/10.5194/egusphere-2024-89, 2024.
-""")
+    Buckley, E. M., Cañuelas, L., Timmermans, M.-L., and Wilhelmus, M. M.: 
+    Seasonal Evolution of the Sea Ice Floe Size Distribution 
+    from Two Decades of MODIS Data, EGUsphere [preprint], 
+    https://doi.org/10.5194/egusphere-2024-89, 2024.
+    """)
 
 
 @app.callback()
