@@ -96,7 +96,7 @@ class DataSet:
     scale: int
     crs: str
     ts: int
-    
+
     def __post_init__(self):
         """ensure that the fields are of the correct type"""
         if not isinstance(self.satellite, Satellite):
