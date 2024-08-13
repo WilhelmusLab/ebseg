@@ -8,6 +8,8 @@ import rasterio
 import requests
 from rasterio.enums import ColorInterp
 
+from ebfloeseg.bbox import BBox
+
 _logger = logging.getLogger(__name__)
 
 
@@ -22,7 +24,7 @@ class Satellite(str, Enum):
     aqua = "aqua"
 
 
-def get_width_height(bbox: tuple[float, float, float, float] | str, scale: float):
+def get_width_height(bbox: BBox | str, scale: float):
     """Get width and height for a bounding box where one pixel corresponds to `scale` bounding box units
 
     Examples:
