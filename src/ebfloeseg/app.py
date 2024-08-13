@@ -12,7 +12,7 @@ from typing import Annotated, Optional
 import pandas
 import typer
 
-from ebfloeseg.bbox import BBox, BBoxParser
+from ebfloeseg.bbox import BoundingBox, BoundingBoxParser
 from ebfloeseg.load import ImageType, Satellite
 from ebfloeseg.load import load as load_
 from ebfloeseg.masking import create_land_mask
@@ -57,9 +57,9 @@ def load(
     satellite: Satellite = Satellite.terra,
     kind: ImageType = ImageType.truecolor,
     bbox: Annotated[
-        BBox,
-        typer.Option(click_type=BBoxParser()),
-    ] = BBox(
+        BoundingBox,
+        typer.Option(click_type=BoundingBoxParser()),
+    ] = BoundingBox(
         -2334051.0214676396, -414387.78951688844, -1127689.8419350237, 757861.8364224486
     ),
     scale: Annotated[

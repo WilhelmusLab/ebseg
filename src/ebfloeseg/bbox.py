@@ -4,14 +4,14 @@ from typing import NamedTuple
 import click
 
 
-class BBox(NamedTuple):
+class BoundingBox(NamedTuple):
     x1: int | float
     y1: int | float
     x2: int | float
     y2: int | float
 
 
-class BBoxParser(click.ParamType):
+class BoundingBoxParser(click.ParamType):
     name = "X1,Y1,X2,Y2"
 
     @classmethod
@@ -55,5 +55,5 @@ class BBoxParser(click.ParamType):
 
         """
         raw_value = ast.literal_eval(value)
-        value = BBox(*raw_value)
+        value = BoundingBox(*raw_value)
         return value
