@@ -125,7 +125,7 @@ def load(
     payload = {
         "REQUEST": "GetSnapshot",
         "TIME": datetime,
-        "BBOX": ",".join(str(f) for f in bbox),
+        "BBOX": f"{bbox.x1},{bbox.y1},{bbox.x2},{bbox.y2}",
         "CRS": crs,
         "LAYERS": layers,
         "WRAP": wrap,
