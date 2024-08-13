@@ -20,7 +20,7 @@ def are_equal(b1: BytesIO, p2: Path):
 @pytest.mark.smoke
 @pytest.mark.slow
 @pytest.mark.parametrize("kind", ImageType)
-def test_load(kind):
+def test_load_runs_in_specific_case_with_validation(kind):
     result = load(kind=kind, scale=10000)
     data = BytesIO(result["content"])
     assert are_equal(data, Path("tests/load/") / f"{kind.value}.tiff")
@@ -29,7 +29,7 @@ def test_load(kind):
 @pytest.mark.slow
 @pytest.mark.parametrize("satellite", Satellite)
 @pytest.mark.parametrize("kind", ImageType)
-def test_load(kind, satellite):
+def test_load_runs_without_crashing_for_different_parameters(kind, satellite):
     load(kind=kind, satellite=satellite, scale=100000)
 
 
