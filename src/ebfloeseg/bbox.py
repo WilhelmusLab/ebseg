@@ -1,10 +1,14 @@
 import ast
-from collections import namedtuple
+from typing import NamedTuple
 
 import click
 
 
-BBox = namedtuple("BBox", ["x1", "y1", "x2", "y2"])
+class BBox(NamedTuple):
+    x1: int | float
+    y1: int | float
+    x2: int | float
+    y2: int | float
 
 
 class BBoxParser(click.ParamType):
