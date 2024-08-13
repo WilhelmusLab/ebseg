@@ -28,7 +28,8 @@ app = typer.Typer(
     Seasonal Evolution of the Sea Ice Floe Size Distribution 
     from Two Decades of MODIS Data, EGUsphere [preprint], 
     https://doi.org/10.5194/egusphere-2024-89, 2024.
-    """)
+    """,
+)
 
 
 @app.callback()
@@ -102,13 +103,11 @@ def process(
     ] = "",
     itmax: Annotated[
         int,
-        typer.Option(..., "--itmax",
-                     help="maximum number of iterations for erosion"),
+        typer.Option(..., "--itmax", help="maximum number of iterations for erosion"),
     ] = 8,
     itmin: Annotated[
         int,
-        typer.Option(..., "--itmin",
-                     help="minimum number of iterations for erosion"),
+        typer.Option(..., "--itmin", help="minimum number of iterations for erosion"),
     ] = 3,
     step: Annotated[int, typer.Option(..., "--step")] = -1,
     kernel_type: Annotated[
