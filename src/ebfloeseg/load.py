@@ -1,13 +1,12 @@
-from collections import namedtuple
 import io
 import logging
+from collections import namedtuple
 from enum import Enum
 
 import numpy as np
 import rasterio
 import requests
 from rasterio.enums import ColorInterp
-
 
 _logger = logging.getLogger(__name__)
 
