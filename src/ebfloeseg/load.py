@@ -49,10 +49,10 @@ def _get_width_height(
     """Get width and height for a bounding box where one pixel corresponds to `scale` bounding box units
 
     Examples:
-        >>> get_width_height(BoundingBox(0, 0, 1, 1), 1)
+        >>> _get_width_height(BoundingBox(0, 0, 1, 1), 1)
         (1, 1)
 
-        >>> get_width_height(BoundingBox(0, 0, 10, 50), 5)
+        >>> _get_width_height(BoundingBox(0, 0, 10, 50), 5)
         (2, 10)
 
     """
