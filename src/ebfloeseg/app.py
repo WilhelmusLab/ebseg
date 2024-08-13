@@ -13,7 +13,11 @@ import pandas
 import typer
 
 from ebfloeseg.bbox import BoundingBox, BoundingBoxParser
-from ebfloeseg.load import ImageType, Satellite
+from ebfloeseg.load import (
+    ImageType,
+    Satellite,
+    ExampleDataSetBeaufortSea as ExampleDataSet,
+)
 from ebfloeseg.load import load as load_
 from ebfloeseg.masking import create_land_mask
 from ebfloeseg.preprocess import preprocess, preprocess_b
@@ -52,21 +56,19 @@ def main(
 @app.command()
 def load(
     outfile: Annotated[Path, typer.Argument()],
-    datetime: str = "2016-07-01T00:00:00Z",
-    wrap: str = "day",
-    satellite: Satellite = Satellite.terra,
-    kind: ImageType = ImageType.truecolor,
+    datetime: str = ExampleDataSet.datetime,
+    wrap: str = ExampleDataSet.wrap,
+    satellite: Satellite = ExampleDataSet.satellite,
+    kind: ImageType = ExampleDataSet.kind,
     bbox: Annotated[
         BoundingBox,
         typer.Option(click_type=BoundingBoxParser()),
-    ] = BoundingBox(
-        -2334051.0214676396, -414387.78951688844, -1127689.8419350237, 757861.8364224486
-    ),
+    ] = ExampleDataSet.bbox,
     scale: Annotated[
         int, typer.Option(help="size of a pixel in units of the bounding box")
-    ] = 250,
-    crs: str = "EPSG:3413",
-    ts: int = 1683675557694,
+    ] = ExampleDataSet.scale,
+    crs: str = ExampleDataSet.crs,
+    ts: int = ExampleDataSet.ts,
     format: str = "image/tiff",
     validate: Annotated[bool, typer.Option(help="validate the image")] = True,
 ):
