@@ -12,7 +12,7 @@ def are_equal(p1, p2):
 @pytest.mark.smoke
 @pytest.mark.slow
 @pytest.mark.parametrize("kind", ImageType)
-def test_load(tmpdir, kind):
+def test_load_runs_in_specific_case_with_validation(tmpdir, kind):
 
     filename = f"{kind.value}.tiff"
     load(tmpdir / filename, kind=kind, scale=10000)
@@ -22,5 +22,5 @@ def test_load(tmpdir, kind):
 @pytest.mark.slow
 @pytest.mark.parametrize("satellite", Satellite)
 @pytest.mark.parametrize("kind", ImageType)
-def test_load(tmp_path, kind, satellite):
+def test_load_runs_without_crashing_for_different_parameters(tmp_path, kind, satellite):
     load(tmp_path / "out.tiff", kind=kind, satellite=satellite, scale=100000)
