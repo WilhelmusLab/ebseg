@@ -19,7 +19,13 @@ from ebfloeseg.preprocess import preprocess, preprocess_b
 _logger = logging.getLogger(__name__)
 
 name = "fsdproc"
-app = typer.Typer(name=name, add_completion=False)
+app = typer.Typer(
+    name=name,
+    add_completion=False,
+    help="""Run the floe size distribution preprocessing from Buckley, E. (2024)
+    
+    Buckley, E. M., Cañuelas, L., Timmermans, M.-L., and Wilhelmus, M. M.: Seasonal Evolution of the Sea Ice Floe Size Distribution from Two Decades of MODIS Data, EGUsphere [preprint], https://doi.org/10.5194/egusphere-2024-89, 2024.
+""")
 
 
 @app.callback()
@@ -81,7 +87,7 @@ class KernelType(str, Enum):
     ellipse = "ellipse"
 
 
-@app.command(help="Preprocess a single set of images.")
+@app.command(help="Process a single set of true-color, cloud, and landmask images.")
 def process(
     truecolorimg: Annotated[Path, typer.Argument()],
     cloudimg: Annotated[Path, typer.Argument()],
@@ -93,11 +99,13 @@ def process(
     ] = "",
     itmax: Annotated[
         int,
-        typer.Option(..., "--itmax", help="maximum number of iterations for erosion"),
+        typer.Option(..., "--itmax",
+                     help="maximum number of iterations for erosion"),
     ] = 8,
     itmin: Annotated[
         int,
-        typer.Option(..., "--itmin", help="minimum number of iterations for erosion"),
+        typer.Option(..., "--itmin",
+                     help="minimum number of iterations for erosion"),
     ] = 3,
     step: Annotated[int, typer.Option(..., "--step")] = -1,
     kernel_type: Annotated[
@@ -179,7 +187,7 @@ def parse_config_file(config_file: Path) -> ConfigParams:
 
 
 @app.command(
-    help="Preprocess a directory of images.",
+    help="Process a directory of images.",
     epilog=f"Example: {name} --data-direc /path/to/data --save_figs --save-direc /path/to/save --land /path/to/landfile",
 )
 def process_batch(
