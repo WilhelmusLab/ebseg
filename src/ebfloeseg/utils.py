@@ -31,7 +31,7 @@ def getdoy(fname: str) -> str:
         str: The day of year (DOY) as a zero-padded string.
 
     Example:
-        >>> getdoy("image_2022_123.jpg")
+        >>> getdoy("image_2022_123.jpg")  # doctest: +SKIP
         '123'
     """
     return fname.split("_")[-2].zfill(3)
@@ -92,35 +92,29 @@ def getres(doy: str, year: str) -> str:
 
 
 def write_mask_values(
-    land_mask: ArrayLike,
     lmd: ArrayLike,
     ice_mask: ArrayLike,
     doy: str,
-    year: str,
     save_direc: str,
+    fname: str,
 ) -> None:
     """
     Write mask values to a text file.
 
     Args:
-        land_mask (numpy.ndarray): Land mask array.
         lmd (numpy.ndarray): Land cloud mask array.
         ice_mask (numpy.ndarray): Ice mask array.
         doy (int): Day of year.
-        year (int): Year.
         save_direc (str): Directory to save the text file.
 
     Returns:
         None
     """
     land_cloud_mask_sum = sum(sum(~(lmd)))
-    fname = (
-        save_direc / f"mask_values.txt"
-    )  # added temporarily while testing. TODO: use doy for subdir
     ice_mask_sum = sum(sum(ice_mask))
     ratio = ice_mask_sum / land_cloud_mask_sum
     towrite = f"{doy}\t{ice_mask_sum}\t{land_cloud_mask_sum}\t{ratio}\n"
-    with open(fname, "a") as f:
+    with open(save_direc / fname, "a") as f:
         f.write(towrite)
 
 

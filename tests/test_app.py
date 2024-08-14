@@ -73,6 +73,7 @@ def test_fsdproc(tmpdir):
     result = subprocess.run(
         [
             "fsdproc",
+            "process-batch",
             "--config-file",
             str(config_file),
         ],

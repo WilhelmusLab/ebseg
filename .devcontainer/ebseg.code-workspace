@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"path": "/home/vscode/cylc-run"
+		},
+		{
+			"path": "/home/vscode/.cylc"
+		}
+	],
+	"settings": {}
+}
