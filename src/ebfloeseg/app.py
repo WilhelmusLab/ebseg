@@ -12,7 +12,7 @@ from typing import Annotated, Optional
 import pandas
 import typer
 
-from ebfloeseg.load import ImageType
+from ebfloeseg.load import ImageType, Satellite
 from ebfloeseg.load import load as load_
 from ebfloeseg.masking import create_land_mask
 from ebfloeseg.preprocess import preprocess, preprocess_b
@@ -63,6 +63,7 @@ def load(
     outfile: Annotated[Path, typer.Argument()],
     datetime: str = "2016-07-01T00:00:00Z",
     wrap: str = "day",
+    satellite: Satellite = Satellite.terra,
     kind: ImageType = ImageType.truecolor,
     bbox: str = "-2334051.0214676396,-414387.78951688844,-1127689.8419350237,757861.8364224486",
     scale: Annotated[
@@ -78,6 +79,7 @@ def load(
         outfile=outfile,
         datetime=datetime,
         wrap=wrap,
+        satellite=satellite,
         kind=kind,
         bbox=bbox,
         scale=scale,
