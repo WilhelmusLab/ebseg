@@ -8,6 +8,8 @@ import rasterio
 import requests
 from rasterio.enums import ColorInterp
 
+from ebfloeseg.bbox import BoundingBox
+
 _logger = logging.getLogger(__name__)
 
 
@@ -22,22 +24,41 @@ class Satellite(str, Enum):
     aqua = "aqua"
 
 
-def get_width_height(bbox: str, scale: float):
+def _rescale(x1: int | float, x2: int | float, scale: int | float) -> int:
+    """
+
+    Examples:
+        >>> _rescale(0, 1, 1)
+        1
+
+        >>> _rescale(0, 10, 10)
+        1
+
+        >>> _rescale(0, 100, 10)
+        10
+
+    """
+    length = abs(x2 - x1)
+    rescaled_length = int(length / scale)
+    return rescaled_length
+
+
+def _get_width_height(
+    bbox: BoundingBox,
+    scale: int | float,
+) -> tuple[int, int]:
     """Get width and height for a bounding box where one pixel corresponds to `scale` bounding box units
 
     Examples:
-        >>> get_width_height("0,0,1,1", 1)
+        >>> _get_width_height(BoundingBox(0, 0, 1, 1), 1)
         (1, 1)
 
-        >>> get_width_height("0,0,10,50", 5)
+        >>> _get_width_height(BoundingBox(0, 0, 10, 50), 5)
         (2, 10)
 
     """
-    x1, y1, x2, y2 = [float(n) for n in bbox.split(",")]
-    x_length = abs(x2 - x1)
-    y_length = abs(y2 - y1)
-
-    width, height = int(x_length / scale), int(y_length / scale)
+    width = _rescale(bbox.x1, bbox.x2, scale)
+    height = _rescale(bbox.y1, bbox.y2, scale)
     return width, height
 
 
@@ -69,7 +90,12 @@ def load(
     wrap: str = "day",
     satellite: Satellite = Satellite.terra,
     kind: ImageType = ImageType.truecolor,
-    bbox: str = "-2334051.0214676396,-414387.78951688844,-1127689.8419350237,757861.8364224486",
+    bbox: BoundingBox = BoundingBox(
+        -2334051.0214676396,
+        -414387.78951688844,
+        -1127689.8419350237,
+        757861.8364224486,
+    ),
     scale: int = 250,
     crs: str = "EPSG:3413",
     ts: int = 1683675557694,
@@ -93,14 +119,14 @@ def load(
             msg = "satellite=%s and image kind=%s not supported" % (satellite, kind)
             raise NotImplementedError(msg)
 
-    width, height = get_width_height(bbox, scale)
+    width, height = _get_width_height(bbox, scale)
     _logger.info("Width: %s Height: %s" % (width, height))
 
     url = f"https://wvs.earthdata.nasa.gov/api/v1/snapshot"
     payload = {
         "REQUEST": "GetSnapshot",
         "TIME": datetime,
-        "BBOX": bbox,
+        "BBOX": f"{bbox.x1},{bbox.y1},{bbox.x2},{bbox.y2}",
         "CRS": crs,
         "LAYERS": layers,
         "WRAP": wrap,
