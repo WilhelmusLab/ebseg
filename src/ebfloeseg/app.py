@@ -193,7 +193,7 @@ def parse_config_file(config_file: Path) -> ConfigParams:
 
 @app.command(
     help="Process a directory of images.",
-    epilog=f"Example: {name} --data-direc /path/to/data --save_figs --save-direc /path/to/save --land /path/to/landfile",
+    epilog=f"Example: {name} --data-direc /path/to/data --save-figs --save-direc /path/to/save --land /path/to/landfile",
 )
 def process_batch(
     config_file: Path = typer.Option(
