@@ -9,6 +9,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Annotated, Optional
 
+import pandas
 import typer
 
 from ebfloeseg.load import ImageType
@@ -252,6 +253,25 @@ def process_batch(
         # Wait for all threads to complete
         for future in futures:
             future.result()
+
+
+@app.command(help="Get the bounding box x1, y1, x2, y2 from a CSV file.")
+def get_bbox(
+    datafile: Annotated[Path, typer.Argument()],
+    index: Annotated[str, typer.Argument()],
+    index_col: Annotated[str, typer.Option()] = "location",
+    colnames: Annotated[list[str], typer.Option()] = [
+        "left_x",
+        "lower_y",
+        "right_x",
+        "top_y",
+    ],
+    separator: Annotated[str, typer.Option()] = ",",
+):
+
+    df = pandas.read_csv(datafile, index_col=index_col)
+    output = separator.join(str(s) for s in list(df.loc[index][colnames]))
+    print(output)
 
 
 if __name__ == "__main__":
