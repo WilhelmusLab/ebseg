@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import io
 import logging
 from collections import namedtuple
@@ -85,20 +86,53 @@ def alpha_not_empty(img: rasterio.DatasetReader):
 LoadResult = namedtuple("LoadResult", ["content", "img"])
 
 
-def load(
-    datetime: str = "2016-07-01T00:00:00Z",
-    wrap: str = "day",
-    satellite: Satellite = Satellite.terra,
-    kind: ImageType = ImageType.truecolor,
-    bbox: BoundingBox = BoundingBox(
-        -2334051.0214676396,
-        -414387.78951688844,
-        -1127689.8419350237,
-        757861.8364224486,
+@dataclass
+class DataSet:
+    datetime: str
+    wrap: str
+    satellite: Satellite
+    kind: ImageType
+    bbox: BoundingBox
+    scale: int
+    crs: str
+    ts: int
+
+    def __post_init__(self):
+        """ensure that the fields are of the correct type"""
+        if not isinstance(self.satellite, Satellite):
+            self.satellite = Satellite(self.satellite)
+        if not isinstance(self.kind, ImageType):
+            self.kind = ImageType(self.kind)
+        if not isinstance(self.bbox, BoundingBox):
+            self.bbox = BoundingBox(*self.bbox)
+
+
+ExampleDataSetBeaufortSea = DataSet(
+    datetime="2016-07-01T00:00:00Z",
+    wrap="day",
+    satellite=Satellite.terra,
+    kind=ImageType.truecolor,
+    scale=250,
+    bbox=BoundingBox(
+        -2334051,
+        -414387,
+        -1127689,
+        757861,
     ),
-    scale: int = 250,
-    crs: str = "EPSG:3413",
-    ts: int = 1683675557694,
+    crs="EPSG:3413",
+    ts=1683675557694,
+)
+
+
+def load(
+    datetime: str = ExampleDataSetBeaufortSea.datetime,
+    wrap: str = ExampleDataSetBeaufortSea.wrap,
+    satellite: Satellite = ExampleDataSetBeaufortSea.satellite,
+    kind: ImageType = ExampleDataSetBeaufortSea.kind,
+    bbox: BoundingBox = ExampleDataSetBeaufortSea.bbox,
+    scale: int = ExampleDataSetBeaufortSea.scale,
+    crs: str = ExampleDataSetBeaufortSea.crs,
+    ts: int = ExampleDataSetBeaufortSea.ts,
     format: str = "image/tiff",
     validate: bool = True,
 ) -> LoadResult:
