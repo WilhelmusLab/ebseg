@@ -47,7 +47,7 @@ def _test_output(tmpdir):
                 pd.testing.assert_frame_equal(df_file, df_expected)
                 continue
             if file.suffix == ".tif":
-                assert are_images_identical(file, expected) # pixel level check
+                assert are_images_identical(file, expected)  # pixel level check
             assert are_files_identical(file, expected)
 
 
