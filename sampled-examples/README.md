@@ -33,7 +33,7 @@ cp ./cylc/oscar/global.cylc ~/.cylc/flow/global.cylc
 
 ```bash
 cylc stop sampled-examples/*;
-cylc install . &&
+cylc install . -n sampled-examples &&
 cylc play sampled-examples \
 --icp 2004-07-25 --fcp 2004-07-26 \
 --set=BBOX="-812500.0,-2112500.0,-712500.0,-2012500.0" \
