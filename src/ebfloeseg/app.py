@@ -72,11 +72,11 @@ def load(
     crs: str = "EPSG:3413",
     ts: int = 1683675557694,
     format: str = "image/tiff",
+    validate: Annotated[bool, typer.Option(help="validate the image")] = True,
 ):
     _logger.debug(locals())
 
-    load_(
-        outfile=outfile,
+    result = load_(
         datetime=datetime,
         wrap=wrap,
         satellite=satellite,
@@ -86,7 +86,11 @@ def load(
         crs=crs,
         ts=ts,
         format=format,
+        validate=validate,
     )
+
+    with open(outfile, "wb") as f:
+        f.write(result.content)
 
     return
 
