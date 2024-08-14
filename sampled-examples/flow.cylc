@@ -8,16 +8,16 @@
 [scheduling]
     initial cycle point = {{ START }}
     final cycle point = {{ END }}
-    
+
     [[graph]]
-        
+
         R1 = """
             setup
         """
 
         P1D = """
-            setup[^] => load-truecolor<satellite> & load-cloud<satellite> & load-land<satellite>
-            load<satellite>:succeed-all => preprocess<satellite>?
+            setup[^] => LOAD<satellite>
+            LOAD<satellite>:succeed-all => preprocess<satellite>?
             preprocess<satellite>:finish => preprocess-get-logs<satellite>
         """
 
@@ -33,18 +33,18 @@
     [[root]]
         execution time limit = PT5M
         [[[environment]]]
-            PIPPACKAGENAME="git+https://github.com/WilhelmusLab/ebseg.git@add-smarter-image-validation-for-landmasks"
-            FSDPROC="pipx run --spec ${PIPPACKAGENAME} fsdproc --debug"    
+            PIPPACKAGENAME="git+https://github.com/WilhelmusLab/ebseg.git@main"
+            FSDPROC="pipx run --spec ${PIPPACKAGENAME} fsdproc --debug"
             LOCATION={{ LOCATION }}
-            BBOX={{ BBOX }} 
+            BBOX={{ BBOX }}
             DATE=$(isodatetime "$CYLC_TASK_CYCLE_POINT" --print-format CCYY-MM-DD)
             DOY=$(date -d "$DATE" +%j)
-    
+
     [[setup]]
         script = """
             ${FSDPROC} --help
         """
-    
+
     [[<satellite>]]
         [[[environment]]]
             SATELLITE=${CYLC_TASK_PARAM_satellite}
@@ -52,31 +52,34 @@
             PREPROCESSDIR=${IMGDIR}
             IMGPREFIX=_img-
 
-    [[load<satellite>]]
+    [[LOAD<satellite>]]
         inherit = <satellite>
 
     [[load-truecolor<satellite>]]
-        inherit = load<satellite>
+        inherit = LOAD<satellite>
         execution retry delays = PT15S, PT10M, PT30M, PT1H
         script = """
             mkdir -p "$IMGDIR"
-            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}truecolor.tiff --kind truecolor --datetime ${DATE} --bbox "${BBOX}" --satellite "${SATELLITE}"
+            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}truecolor.tiff --kind truecolor \
+            --datetime ${DATE} --bbox "${BBOX}" --satellite "${SATELLITE}"
         """
 
     [[load-cloud<satellite>]]
-        inherit = load<satellite>
+        inherit = LOAD<satellite>
         execution retry delays = PT15S, PT10M, PT30M, PT1H
         script = """
             mkdir -p "$IMGDIR"
-            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}cloud.tiff --kind cloud --datetime ${DATE} --bbox "${BBOX}" --satellite "${SATELLITE}"
+            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}cloud.tiff --kind cloud \
+            --datetime ${DATE} --bbox "${BBOX}" --satellite "${SATELLITE}"
         """
 
     [[load-land<satellite>]]
-        inherit = load<satellite>
+        inherit = LOAD<satellite>
         execution retry delays = PT15S, PT10M, PT30M, PT1H
         script = """
             mkdir -p "$IMGDIR"
-            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}land.tiff --kind landmask --datetime ${DATE} --bbox "$BBOX"  --no-validate
+            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}land.tiff --kind landmask --no-validate \
+            --datetime ${DATE} --bbox "$BBOX"
         """
 
     [[preprocess<satellite>]]
