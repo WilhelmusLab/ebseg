@@ -1,10 +1,8 @@
-from enum import Enum
 import logging
+from enum import Enum
 from pathlib import Path
-from typing import Annotated
-import requests
 
-import typer
+import requests
 
 _logger = logging.getLogger(__name__)
 
@@ -34,47 +32,18 @@ def get_width_height(bbox: str, scale: float):
     return width, height
 
 
-def logger_config(debug: bool, verbose: bool, quiet: bool):
-    if debug:
-        level = logging.DEBUG
-    elif verbose:
-        level = logging.INFO
-    elif quiet:
-        level = logging.ERROR
-    else:
-        level = logging.WARNING
-
-    logging.basicConfig(level=level)
-    return
-
-
-app = typer.Typer()
-
-
-@app.command()
-def main(
-    outfile: Annotated[Path, typer.Argument()],
+def load(
+    outfile: Path,
     datetime: str = "2016-07-01T00:00:00Z",
     wrap: str = "day",
     kind: ImageType = ImageType.truecolor,
     bbox: str = "-2334051.0214676396,-414387.78951688844,-1127689.8419350237,757861.8364224486",
-    scale: Annotated[
-        int, typer.Option(help="size of a pixel in units of the bounding box")
-    ] = 250,
+    scale: int = 250,
     crs: str = "EPSG:3413",
     ts: int = 1683675557694,
     format: str = "image/tiff",
-    quiet: Annotated[
-        bool, typer.Option(help="make the program less talkative")
-    ] = False,
-    verbose: Annotated[
-        bool, typer.Option(help="make the program more talkative")
-    ] = False,
-    debug: Annotated[
-        bool, typer.Option(help="make the program much more talkative")
-    ] = False,
 ):
-    logger_config(debug, verbose, quiet)
+    """Load an image from the NASA Worldview Snapshots API"""
 
     match kind:
         case ImageType.truecolor:
@@ -110,4 +79,7 @@ def main(
 
 
 if __name__ == "__main__":
-    app()
+    logging.basicConfig(level=logging.DEBUG)
+    load(kind=ImageType.truecolor)
+    load(kind=ImageType.cloud)
+    load(kind=ImageType.landmask)
