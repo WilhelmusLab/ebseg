@@ -14,29 +14,6 @@ def getdirs(p: Path):
     return [x for x in Path(p).iterdir() if x.is_dir()]
 
 
-def files_are_equal(file1, file2, chunk_size=1024):
-    """
-    Check if two files are equal by sequentially comparing their contents.
-
-    Args:
-        file1 (str): The path to the first file.
-        file2 (str): The path to the second file.
-
-    Returns:
-        bool: True if the files are equal, False otherwise.
-    """
-    with open(file1, "rb") as f1, open(file2, "rb") as f2:
-        while True:
-            b1 = f1.read(chunk_size)
-            b2 = f2.read(chunk_size)
-
-            if b1 != b2:
-                return False
-
-            if not b1:  # End of file reached
-                return True
-
-
 def are_files_identical(file1, file2):
     return filecmp.cmp(file1, file2, shallow=False)
 
@@ -47,10 +24,6 @@ def are_images_identical(image1_path, image2_path):
         rasterio.open(str(image2_path)) as img2,
     ):
         return np.array_equal(img1.read(), img2.read())
-
-
-def are_equal(p1, p2):
-    return Path(p1).read_bytes() == Path(p2).read_bytes()
 
 
 def read_to_df(p1, p2):
@@ -74,10 +47,8 @@ def _test_output(tmpdir):
                 pd.testing.assert_frame_equal(df_file, df_expected)
                 continue
             if file.suffix == ".tif":
-                assert are_images_identical(file, expected)
-            assert files_are_equal(file, expected)
+                assert are_images_identical(file, expected) # pixel level check
             assert are_files_identical(file, expected)
-            assert are_equal(file, expected)
 
 
 @pytest.mark.smoke
@@ -104,8 +75,6 @@ def test_fsdproc(tmpdir):
             "fsdproc",
             "--config-file",
             str(config_file),
-            "--max-workers",
-            "1",
         ],
         capture_output=True,
         text=True,
