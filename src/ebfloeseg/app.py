@@ -257,7 +257,7 @@ def process_batch(
             future.result()
 
 
-@app.command()
+@app.command(help="Get the bounding box x1, y1, x2, y2 from a CSV file.")
 def get_bbox(
     datafile: Annotated[Path, typer.Argument()],
     index: Annotated[str, typer.Argument()],
