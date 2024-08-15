@@ -29,10 +29,10 @@ app = typer.Typer(
     name=name,
     add_completion=False,
     help="""Run the floe size distribution processing by Buckley, E. (2024)
-    
-    Buckley, E. M., Cañuelas, L., Timmermans, M.-L., and Wilhelmus, M. M.: 
-    Seasonal Evolution of the Sea Ice Floe Size Distribution 
-    from Two Decades of MODIS Data, EGUsphere [preprint], 
+
+    Buckley, E. M., Cañuelas, L., Timmermans, M.-L., and Wilhelmus, M. M.:
+    Seasonal Evolution of the Sea Ice Floe Size Distribution
+    from Two Decades of MODIS Data, EGUsphere [preprint],
     https://doi.org/10.5194/egusphere-2024-89, 2024.
     """,
 )
@@ -246,7 +246,7 @@ def process_batch(
     ftcis = sorted(Path(ftci_direc).iterdir())
     fclouds = sorted(Path(fcloud_direc).iterdir())
 
-    with ProcessPoolExecutor() as executor:
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = []
         for ftci, fcloud in zip(ftcis, fclouds):
             future = executor.submit(

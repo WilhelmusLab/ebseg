@@ -1,89 +1,59 @@
 from pathlib import Path
 import subprocess
-from collections import defaultdict
+import filecmp
 
 import pytest
 import pandas as pd
+import rasterio
+import numpy as np
 
 from ebfloeseg.app import parse_config_file
 
 
-def are_equal(p1, p2):
-    return Path(p1).read_bytes() == Path(p2).read_bytes()
+def getdirs(p: Path):
+    return [x for x in Path(p).iterdir() if x.is_dir()]
 
 
-def check_sums(p1, p2):
-    s1 = pd.read_csv(p1).to_numpy().sum()
-    s2 = pd.read_csv(p2).to_numpy().sum()
-    return s1 == s2
+def are_files_identical(file1, file2):
+    return filecmp.cmp(file1, file2, shallow=False)
+
+
+def are_images_identical(image1_path, image2_path):
+    with (
+        rasterio.open(str(image1_path)) as img1,
+        rasterio.open(str(image2_path)) as img2,
+    ):
+        return np.array_equal(img1.read(), img2.read())
+
+
+def read_to_df(p1, p2):
+    df1 = pd.read_csv(p1)
+    df2 = pd.read_csv(p2)
+    return df1, df2
 
 
 # Check final images
 def _test_output(tmpdir):
     expdir = Path("tests/expected")
-    # Check final images
-    # -----------------------------------------------------------------
-    f214 = tmpdir / "214" / "2012-08-01_terra_final.tif"
-    f214expected = expdir / "214/2012-08-01_214_terra_final.tif"
-    assert are_equal(f214, f214expected)
-    f215expected = expdir / "215/2012-08-02_215_terra_final.tif"
-    f215 = tmpdir / "215/2012-08-02_terra_final.tif"
-    assert are_equal(f215, f215expected)
-
-    # Check mask values
-    # -----------------------------------------------------------------
-    maskvalues214 = tmpdir / "214/mask_values.txt"
-    maskvalues214expected = expdir / "214/mask_values.txt"
-    assert are_equal(maskvalues214, maskvalues214expected)
-
-    maskvalues215 = tmpdir / "215/mask_values.txt"
-    maskvalues215expected = expdir / "215/mask_values.txt"
-    assert are_equal(maskvalues215, maskvalues215expected)
-
-    # Check feature extraction
-    # -----------------------------------------------------------------
-    features214 = tmpdir / "214/2012-08-01_terra_props.csv"
-    features214expected = expdir / "214/2012-08-01_terra_props.csv"
-    assert check_sums(features214, features214expected)
-
-    features215 = tmpdir / "215/2012-08-02_terra_props.csv"
-    features215expected = expdir / "215/2012-08-02_terra_props.csv"
-    assert check_sums(features215, features215expected)
-
-    # Check intermediate identification rounds
-    # -----------------------------------------------------------------
-    for doy in ["214", "215"]:
-        id_rounds = sorted(Path(tmpdir / doy).glob("*round*.tif"))
-        expected_rounds = sorted((expdir / doy).glob("*round*.tif"))
-
-        for id_round, expected_round in zip(id_rounds, expected_rounds):
-            assert are_equal(id_round, expected_round)
-
-
-def getmaskvalues(path):
-    with open(path, "r") as f:
-        lines = f.readlines()
-
-    mask_values = [float(x) for x in lines[0].split()]
-    return mask_values
-
-
-def group_files_by_extension(folder_path):
-    grouped_files = defaultdict(list)
-    folder = Path(folder_path)
-
-    for file in folder.iterdir():
-        if file.is_file():
-            extension = file.suffix
-            grouped_files[extension].append(file.name)
-
-    return dict(grouped_files)
+    # Check all tif images, including final and identification rounds, and csv and txt files
+    # --------------------------------------------------------------------------------------
+    for d in getdirs(tmpdir):
+        for file in d.glob(
+            "*[!.png]"
+        ):  # Exclude png files as they are not created in the original code
+            expected = expdir / file.relative_to(tmpdir)
+            if file.suffix == ".csv":
+                df_file, df_expected = read_to_df(file, expected)
+                pd.testing.assert_frame_equal(df_file, df_expected)
+                continue
+            if file.suffix == ".tif":
+                assert are_images_identical(file, expected)  # pixel level check
+            assert are_files_identical(file, expected)
 
 
 @pytest.mark.smoke
 @pytest.mark.slow
 def test_fsdproc(tmpdir):
-    expdir = Path("tests/expected")
     config_file = tmpdir.join("config.toml")
     config_file.write(
         f"""
@@ -106,8 +76,6 @@ def test_fsdproc(tmpdir):
             "process-batch",
             "--config-file",
             str(config_file),
-            "--max-workers",
-            "1",
         ],
         capture_output=True,
         text=True,
