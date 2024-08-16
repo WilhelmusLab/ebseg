@@ -35,10 +35,8 @@
         [[[environment]]]
             PIPPACKAGENAME="git+https://github.com/WilhelmusLab/ebseg.git@allow-arbitrary-pixel-size"
             FSDPROC="pipx run --spec ${PIPPACKAGENAME} fsdproc --debug"
-            LOCATION={{ LOCATION }}
-            BBOX={{ BBOX }}
             DATE=$(isodatetime "$CYLC_TASK_CYCLE_POINT" --print-format CCYY-MM-DD)
-            DOY=$(date -d "$DATE" +%j)
+            LOAD_REGION_ARGS="--datetime ${DATE} --bbox \"{{ BBOX }}\" --scale {{ SCALE }}"
 
     [[setup]]
         script = """
@@ -48,44 +46,42 @@
     [[<satellite>]]
         [[[environment]]]
             SATELLITE=${CYLC_TASK_PARAM_satellite}
-            IMGDIR=${CYLC_WORKFLOW_SHARE_DIR}/${LOCATION}-${DATE}-${SATELLITE}/
+            IMGDIR=${CYLC_WORKFLOW_SHARE_DIR}/{{ LOCATION }}-${DATE}-${SATELLITE}/
             PREPROCESSDIR=${IMGDIR}
             IMGPREFIX=_img-
 
     [[LOAD<satellite>]]
         inherit = <satellite>
+        pre-script = """mkdir -p "$IMGDIR" """
 
     [[load-truecolor<satellite>]]
         inherit = LOAD<satellite>
         execution retry delays = PT15S, PT10M, PT30M, PT1H
         script = """
-            mkdir -p "$IMGDIR"
-            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}truecolor.tiff --kind truecolor \
-            --datetime ${DATE} --bbox "${BBOX}" --satellite "${SATELLITE}"
+            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}truecolor.tiff --kind truecolor --satellite "${SATELLITE}" \
+            ${LOAD_REGION_ARGS}
         """
 
     [[load-cloud<satellite>]]
         inherit = LOAD<satellite>
         execution retry delays = PT15S, PT10M, PT30M, PT1H
         script = """
-            mkdir -p "$IMGDIR"
-            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}cloud.tiff --kind cloud \
-            --datetime ${DATE} --bbox "${BBOX}" --satellite "${SATELLITE}"
+            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}cloud.tiff --kind cloud --satellite "${SATELLITE}" \
+            ${LOAD_REGION_ARGS}
         """
 
     [[load-land<satellite>]]
         inherit = LOAD<satellite>
         execution retry delays = PT15S, PT10M, PT30M, PT1H
         script = """
-            mkdir -p "$IMGDIR"
             ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}land.tiff --kind landmask --no-validate \
-            --datetime ${DATE} --bbox "$BBOX"
+            ${LOAD_REGION_ARGS}
         """
 
     [[preprocess<satellite>]]
         inherit = <satellite>
+        pre-script = """mkdir -p "$PREPROCESSDIR" """
         script = """
-        mkdir -p "$PREPROCESSDIR"
         ${FSDPROC} process \
             "${IMGDIR}/${IMGPREFIX}truecolor.tiff" \
             "${IMGDIR}/${IMGPREFIX}cloud.tiff" \
@@ -95,7 +91,7 @@
 
     [[preprocess-get-logs<satellite>]]
         inherit = <satellite>
+        pre-script = """mkdir -p "${IMGDIR}/preprocess-logs" """
         script = """
-            mkdir ${IMGDIR}/preprocess-logs
             cp ${CYLC_WORKFLOW_RUN_DIR}/log/job/${CYLC_TASK_CYCLE_POINT}/preprocess_${SATELLITE}/NN/* ${IMGDIR}/preprocess-logs/.
         """
