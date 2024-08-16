@@ -69,6 +69,9 @@ def _get_width_height(
         >>> _get_width_height(BoundingBox(0, 0, 10, 50), 5)
         (2, 10)
 
+        >>> _get_width_height(BoundingBox(0, 0, 100_000, 100_000), 256)
+        (391, 391)
+
     """
     width = _rescale(bbox.x1, bbox.x2, scale)
     height = _rescale(bbox.y1, bbox.y2, scale)
