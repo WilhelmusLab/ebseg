@@ -29,8 +29,6 @@ cp ./cylc/oscar/global.cylc ~/.cylc/flow/global.cylc
 
 ## Looping through the case list
 
-
-
 ```bash
 cylc stop sampled-examples/*;
 cylc install . -n sampled-examples &&
@@ -69,4 +67,19 @@ do
   cp -r $dir output/
   sleep 0.1
 done
+```
+
+# Running the case list using a 256m pixel size
+
+```bash
+scale=256
+datafile="all-cases.csv"
+index_col="fullname"
+for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}" --start 21 --end 22); 
+do   
+  cylc install . --run-name=${fullname}-${scale}
+  cylc play sampled-examples/${fullname}-${scale} --set=SCALE=${scale} $(pipx run util/template.py ${datafile} ${index_col} ${fullname}); 
+done
+
+cylc tui
 ```
