@@ -33,8 +33,8 @@ cylc stop sampled-examples/*;
 cylc install . -n sampled-examples &&
 cylc play sampled-examples \
 --icp 2004-07-25 --fcp 2004-07-26 \
---set=BBOX="-812500.0,-2112500.0,-712500.0,-2012500.0" \
---set=LOCATION="'baffin_bay'" && # note that this string has to be "'double quoted'"
+--set="BBOX='-812500.0,-2112500.0,-712500.0,-2012500.0'" \
+--set="LOCATION='baffin_bay'" &&
 cylc tui sampled-examples
 ```
 
@@ -71,14 +71,37 @@ done
 # Running the case list using a 256m pixel size
 
 ```bash
+touch script.sh && rm script.sh;
 scale=256
 datafile="all-cases.csv"
 index_col="fullname"
-for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}" --start 20 --stop 21); 
+for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}"); 
 do   
-  cylc install . --run-name=${fullname}-${scale}m
-  cylc play sampled-examples/${fullname}-${scale}m --set=SCALE=${scale} $(pipx run util/template.py ${datafile} ${index_col} ${fullname}); 
+  echo cylc install . --run-name=${fullname}-${scale}m >> script.sh
+  echo cylc play sampled-examples/${fullname}-${scale}m --set SCALE=${scale} $(pipx run util/template.py ${datafile} ${index_col} ${fullname}) >> script.sh ;
 done
+```
+
+```
+bash script.sh
 
 cylc tui
+```
+
+
+Copy all the output files to the /output directory
+```bash
+
+rundir="${HOME}/cylc-run/sampled-examples"
+targetdir="/oscar/data/mmart119/jholla10/ebseg/output/256m"
+for run in ${rundir}/*/
+do
+  mkdir "${targetdir}/$(basename $run)/"
+  
+  for datadir in ${run}share/*
+  do
+    cp -r ${datadir}/ "${targetdir}/$(basename $run)/."
+  done;
+  sleep 0.1
+done;
 ```
