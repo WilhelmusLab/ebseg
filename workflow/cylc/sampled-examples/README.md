@@ -3,8 +3,7 @@
 Installation:
 
 ```bash
-pipx install cylc-rose  # this will install cylc and rose
-pipx install uv  # required for faster setup
+pipx install cylc-rose --include-deps  # this will install cylc and rose
 ```
 
 ## Cylc
@@ -75,10 +74,10 @@ done
 scale=256
 datafile="all-cases.csv"
 index_col="fullname"
-for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}" --start 21 --stop 22); 
+for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}" --start 20 --stop 21); 
 do   
-  cylc install . --run-name=${fullname}-${scale}
-  cylc play sampled-examples/${fullname}-${scale} --set=SCALE=${scale} $(pipx run util/template.py ${datafile} ${index_col} ${fullname}); 
+  cylc install . --run-name=${fullname}-${scale}m
+  cylc play sampled-examples/${fullname}-${scale}m --set=SCALE=${scale} $(pipx run util/template.py ${datafile} ${index_col} ${fullname}); 
 done
 
 cylc tui

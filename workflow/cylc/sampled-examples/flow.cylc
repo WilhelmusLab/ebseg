@@ -26,8 +26,8 @@
             limit = 10
             members = preprocess<satellite>
         [[[q_load]]]
-            limit = 5
-            members = load-truecolor<satellite>, load-cloud<satellite>, load-land<satellite>
+            limit = 10
+            members = LOAD<satellite>
 
 [runtime]
     [[root]]
@@ -36,7 +36,6 @@
             PIPPACKAGENAME="git+https://github.com/WilhelmusLab/ebseg.git@allow-arbitrary-pixel-size"
             FSDPROC="pipx run --spec ${PIPPACKAGENAME} fsdproc --debug"
             DATE=$(isodatetime "$CYLC_TASK_CYCLE_POINT" --print-format CCYY-MM-DD)
-            LOAD_REGION_ARGS="--datetime ${DATE} --bbox \"{{ BBOX }}\" --scale {{ SCALE }}"
 
     [[setup]]
         script = """
@@ -59,7 +58,7 @@
         execution retry delays = PT15S, PT10M, PT30M, PT1H
         script = """
             ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}truecolor.tiff --kind truecolor --satellite "${SATELLITE}" \
-            ${LOAD_REGION_ARGS}
+            --datetime ${DATE} --bbox "{{ BBOX }}" --scale {{ SCALE }}
         """
 
     [[load-cloud<satellite>]]
@@ -67,7 +66,7 @@
         execution retry delays = PT15S, PT10M, PT30M, PT1H
         script = """
             ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}cloud.tiff --kind cloud --satellite "${SATELLITE}" \
-            ${LOAD_REGION_ARGS}
+            --datetime ${DATE} --bbox "{{ BBOX }}" --scale {{ SCALE }}
         """
 
     [[load-land<satellite>]]
@@ -75,7 +74,7 @@
         execution retry delays = PT15S, PT10M, PT30M, PT1H
         script = """
             ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}land.tiff --kind landmask --no-validate \
-            ${LOAD_REGION_ARGS}
+            --datetime ${DATE} --bbox "{{ BBOX }}" --scale {{ SCALE }}
         """
 
     [[preprocess<satellite>]]
