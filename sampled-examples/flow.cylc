@@ -33,7 +33,7 @@
     [[root]]
         execution time limit = PT5M
         [[[environment]]]
-            PIPPACKAGENAME="git+https://github.com/WilhelmusLab/ebseg.git@main"
+            PIPPACKAGENAME="git+https://github.com/WilhelmusLab/ebseg.git@allow-arbitrary-pixel-size"
             FSDPROC="pipx run --spec ${PIPPACKAGENAME} fsdproc --debug"
             LOCATION={{ LOCATION }}
             BBOX={{ BBOX }}
