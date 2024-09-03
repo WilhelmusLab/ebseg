@@ -23,12 +23,12 @@ ExampleDataSetBeaufortSea = DataSet(
     wrap="day",
     satellite=Satellite.terra,
     kind=ImageType.truecolor,
-    scale=250,
+    scale=10000,
     bbox=(
-        -2334051.0214676396,
-        -414387.78951688844,
-        -1127689.8419350237,
-        757861.8364224486,
+        -2330000,
+        -420000,
+        -1130000,
+        750000,
     ),
     crs="EPSG:3413",
     ts=1683675557694,
@@ -40,7 +40,7 @@ ExampleDataSetBeaufortSea = DataSet(
 @pytest.mark.parametrize("kind", ImageType)
 def test_load_runs_in_specific_case_with_validation(kind):
     kwargs = dataclasses.asdict(ExampleDataSetBeaufortSea)
-    kwargs.update(kind=kind, scale=10000)
+    kwargs.update(kind=kind)
     result = load(**kwargs, format="image/tiff")
     data = BytesIO(result.content)
     assert are_equal(data, Path("tests/load/") / f"{kind.value}.tiff")
