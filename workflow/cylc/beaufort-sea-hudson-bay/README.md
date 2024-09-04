@@ -3,7 +3,7 @@
 Run the ebseg pipeline on Beaufort Sea and Hudson Bay.
 
 ## Cylc
-To run the `cylc` workflow with the test data, run:
+To run the `cylc` workflow:
 ```bash
 name=beaufort-sea-hudson-bay  # define a name for this run
 cylc stop "${name}/*"         # stops any currently running workflows with the name

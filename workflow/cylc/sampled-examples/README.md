@@ -2,15 +2,16 @@
 
 Run the ebseg pipeline on the domains listed in [all-cases.csv](./all-cases.csv).
 
-## Rose
+## Prerequisites
 
-Installation:
+This requires `cylc-rose`. Install using:
 
 ```bash
 pipx install cylc-rose --include-deps  # this will install cylc and rose
 ```
 
-## Cylc
+## Run with default parameters
+
 To run the `cylc` workflow with the defaults from [rose-suite.conf](./rose-suite.conf), run:
 ```bash
 name=sampled-examples
@@ -53,7 +54,7 @@ done
 cylc tui
 ```
 
-Copy all the output files to the /output directory
+Copy all the output files to the `./output/` directory
 ```bash
 rundir="${HOME}/cylc-run/${name}"
 targetdir="output/${scale}m/"

@@ -6,7 +6,7 @@ Seasonal Evolution of the Sea Ice Floe Size Distribution
 from Two Decades of MODIS Data, EGUsphere [preprint],
 https://doi.org/10.5194/egusphere-2024-89, 2024.
 
-To run the `cylc` workflow with the test data, run:
+To run the `cylc` workflow:
 ```bash
 cylc stop ebseg-paper-domain*/*
 cylc vip . -n ebseg-paper-domain-06 --initial-cycle-point=2006-05-04 --final-cycle-point=2006-05-06
