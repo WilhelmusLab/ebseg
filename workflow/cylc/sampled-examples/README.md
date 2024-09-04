@@ -73,8 +73,8 @@ datafile="all-cases.csv"
 index_col="fullname"
 for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}" --start 50 --stop 51); 
 do   
-  cylc install . --run-name=${fullname}-${scale}m >> script.sh
-  cylc play sampled-examples/${fullname}-${scale}m --set SCALE=${scale} $(pipx run util/template.py ${datafile} ${index_col} ${fullname}) >> script.sh ;
+  cylc install . --run-name=${fullname}-${scale}m 
+  cylc play sampled-examples/${fullname}-${scale}m --set SCALE=${scale} $(pipx run util/template.py ${datafile} ${index_col} ${fullname});
 done
 ```
 
