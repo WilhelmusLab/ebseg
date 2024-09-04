@@ -1,0 +1,96 @@
+#!jinja2
+[scheduler]
+    allow implicit tasks = True
+
+[task parameters]
+    satellite = {{ SATELLITES | join(", ")}}
+
+[scheduling]
+    initial cycle point = {{ START }}
+    final cycle point = {{ END }}
+
+    [[graph]]
+
+        R1 = """
+            setup
+        """
+
+        P1D = """
+            setup[^] => LOAD<satellite>
+            LOAD<satellite>:succeed-all => preprocess<satellite>?
+            preprocess<satellite>:finish => preprocess-get-logs<satellite>
+        """
+
+    [[queues]]
+        [[[q_preprocess]]]
+            limit = 10
+            members = preprocess<satellite>
+        [[[q_load]]]
+            limit = 10
+            members = LOAD<satellite>
+
+[runtime]
+    [[root]]
+        execution time limit = PT5M
+        [[[environment]]]
+            PIPPACKAGENAME="git+https://github.com/WilhelmusLab/ebseg.git@main"
+            FSDPROC="pipx run --spec ${PIPPACKAGENAME} fsdproc --debug"
+            DATE=$(isodatetime "$CYLC_TASK_CYCLE_POINT" --print-format CCYY-MM-DD)
+
+    [[setup]]
+        script = """
+            ${FSDPROC} --help
+        """
+
+    [[<satellite>]]
+        [[[environment]]]
+            SATELLITE=${CYLC_TASK_PARAM_satellite}
+            IMGDIR=${CYLC_WORKFLOW_SHARE_DIR}/{{ LOCATION }}-${DATE}-${SATELLITE}/
+            PREPROCESSDIR=${IMGDIR}
+            IMGPREFIX=_img-
+
+    [[LOAD<satellite>]]
+        inherit = <satellite>
+        pre-script = """mkdir -p "$IMGDIR" """
+
+    [[load-truecolor<satellite>]]
+        inherit = LOAD<satellite>
+        execution retry delays = PT15S, PT10M, PT30M, PT1H
+        script = """
+            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}truecolor.tiff --kind truecolor --satellite "${SATELLITE}" \
+            --datetime ${DATE} --bbox "{{ BBOX }}" --scale {{ SCALE }}
+        """
+
+    [[load-cloud<satellite>]]
+        inherit = LOAD<satellite>
+        execution retry delays = PT15S, PT10M, PT30M, PT1H
+        script = """
+            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}cloud.tiff --kind cloud --satellite "${SATELLITE}" \
+            --datetime ${DATE} --bbox "{{ BBOX }}" --scale {{ SCALE }}
+        """
+
+    [[load-land<satellite>]]
+        inherit = LOAD<satellite>
+        execution retry delays = PT15S, PT10M, PT30M, PT1H
+        script = """
+            ${FSDPROC} load ${IMGDIR}/${IMGPREFIX}land.tiff --kind landmask --no-validate \
+            --datetime ${DATE} --bbox "{{ BBOX }}" --scale {{ SCALE }}
+        """
+
+    [[preprocess<satellite>]]
+        inherit = <satellite>
+        pre-script = """mkdir -p "$PREPROCESSDIR" """
+        script = """
+        ${FSDPROC} process \
+            "${IMGDIR}/${IMGPREFIX}truecolor.tiff" \
+            "${IMGDIR}/${IMGPREFIX}cloud.tiff" \
+            "${IMGDIR}/${IMGPREFIX}land.tiff" \
+            "${PREPROCESSDIR}"
+        """
+
+    [[preprocess-get-logs<satellite>]]
+        inherit = <satellite>
+        pre-script = """mkdir -p "${IMGDIR}/preprocess-logs" """
+        script = """
+            cp ${CYLC_WORKFLOW_RUN_DIR}/log/job/${CYLC_TASK_CYCLE_POINT}/preprocess_${SATELLITE}/NN/* ${IMGDIR}/preprocess-logs/.
+        """
