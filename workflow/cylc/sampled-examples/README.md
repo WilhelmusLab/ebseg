@@ -9,11 +9,10 @@ pipx install cylc-rose --include-deps  # this will install cylc and rose
 ## Cylc
 To run the `cylc` workflow with the test data, run:
 ```bash
-cylc stop sampled-examples/*;
-cylc validate . &&
-cylc install . &&
-cylc play sampled-examples &&
-cylc tui sampled-examples 
+name=sampled-examples
+cylc stop "${name}/*";
+cylc vip . -n ${name}
+cylc tui ${name}
 ```
 
 ## OSCAR
@@ -25,30 +24,28 @@ mkdir -p ~/.cylc/flow
 cp ./cylc/oscar/global.cylc ~/.cylc/flow/global.cylc
 ```
 
+## Run a single example using the workflow
+
+```bash
+name=single-example
+cylc vip . -n ${name} \
+--icp 2004-07-25 --fcp 2004-07-26 \
+--set="BBOX='-812500.0,-2112500.0,-712500.0,-2012500.0'" \
+--set="LOCATION='baffin_bay'" &&
+cylc tui ${name}
+```
 
 ## Looping through the case list
 
 ```bash
 cylc stop sampled-examples/*;
-cylc install . -n sampled-examples &&
-cylc play sampled-examples \
---icp 2004-07-25 --fcp 2004-07-26 \
---set="BBOX='-812500.0,-2112500.0,-712500.0,-2012500.0'" \
---set="LOCATION='baffin_bay'" &&
-cylc tui sampled-examples
-```
-
-
-```bash
-cylc stop sampled-examples/*;
-cylc clean sampled-examples
-
+cylc clean sampled-examples -y
 ```
 
 ```bash
 datafile="all-cases.csv"
 index_col="fullname"
-for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}" --start 50); 
+for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}" --start 50 --stop 51); 
 do   
   cylc install . --run-name=${fullname}
   cylc play sampled-examples/${fullname} $(pipx run util/template.py ${datafile} ${index_col} ${fullname}); 
