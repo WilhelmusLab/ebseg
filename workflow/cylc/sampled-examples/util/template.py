@@ -24,7 +24,7 @@ def _template(df, row_index):
     """
     Examples:
 
-        >>> import io
+        >>> import io, pandas
         >>> csv = '''id,location,left_x,right_x,lower_y,top_y,startdate,enddate
         ... beaufort-sea-0,beaufort-sea,-2383879,-883879,-750000,750000,2020-09-05,2020-09-08
         ... hudson-bay-0,hudson-bay,-2795941,-1295941,-3368686,-1868686,2020-09-06,2020-09-09
