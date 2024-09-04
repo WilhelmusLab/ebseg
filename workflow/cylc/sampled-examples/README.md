@@ -65,26 +65,18 @@ do
 done
 ```
 
-# Running the case list using a 256m pixel size
+## Running the case list using a 256m pixel size
 
 ```bash
-touch script.sh && rm script.sh;
 scale=256
 datafile="all-cases.csv"
 index_col="fullname"
-for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}"); 
+for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}" --start 50 --stop 51); 
 do   
-  echo cylc install . --run-name=${fullname}-${scale}m >> script.sh
-  echo cylc play sampled-examples/${fullname}-${scale}m --set SCALE=${scale} $(pipx run util/template.py ${datafile} ${index_col} ${fullname}) >> script.sh ;
+  cylc install . --run-name=${fullname}-${scale}m >> script.sh
+  cylc play sampled-examples/${fullname}-${scale}m --set SCALE=${scale} $(pipx run util/template.py ${datafile} ${index_col} ${fullname}) >> script.sh ;
 done
 ```
-
-```
-bash script.sh
-
-cylc tui
-```
-
 
 Copy all the output files to the /output directory
 ```bash
