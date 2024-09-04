@@ -1,6 +1,5 @@
-# Project specific file types
+# Project specific files types
 *.tif
-.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
