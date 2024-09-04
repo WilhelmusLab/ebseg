@@ -33,7 +33,7 @@
     [[root]]
         execution time limit = PT5M
         [[[environment]]]
-            PIPPACKAGENAME="git+https://github.com/WilhelmusLab/ebseg.git@allow-arbitrary-pixel-size"
+            PIPPACKAGENAME="git+https://github.com/WilhelmusLab/ebseg.git@main"
             FSDPROC="pipx run --spec ${PIPPACKAGENAME} fsdproc --debug"
             DATE=$(isodatetime "$CYLC_TASK_CYCLE_POINT" --print-format CCYY-MM-DD)
 
