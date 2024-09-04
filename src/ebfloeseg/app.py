@@ -8,7 +8,6 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Annotated, Optional
-import io
 
 import pandas
 import typer
@@ -37,8 +36,6 @@ app = typer.Typer(
     https://doi.org/10.5194/egusphere-2024-89, 2024.
     """,
 )
-process_batch_app = typer.Typer(help="Process a directory of images.")
-app.add_typer(process_batch_app, name="process-batch")
 
 
 @app.callback()
@@ -64,6 +61,25 @@ def main(
 
     logging.basicConfig(level=level)
     return
+
+
+@app.command(help="Get the bounding box x1, y1, x2, y2 from a CSV file.")
+def get_bbox(
+    datafile: Annotated[Path, typer.Argument()],
+    index: Annotated[str, typer.Argument()],
+    index_col: Annotated[str, typer.Option()] = "location",
+    colnames: Annotated[list[str], typer.Option()] = [
+        "left_x",
+        "lower_y",
+        "right_x",
+        "top_y",
+    ],
+    separator: Annotated[str, typer.Option()] = ",",
+):
+
+    df = pandas.read_csv(datafile, index_col=index_col)
+    output = separator.join(str(s) for s in list(df.loc[index][colnames]))
+    print(output)
 
 
 @app.command(help="Download an image.")
@@ -156,6 +172,18 @@ def process(
     return
 
 
+process_batch_name = "process-batch"
+process_batch_app = typer.Typer(
+    help="Process a directory of images.",
+    epilog=f"""
+Example:\n
+{name} {process_batch_name} config -c configjob.toml\n
+{name} {process_batch_name} run -c configjob.toml
+""",
+)
+app.add_typer(process_batch_app, name=process_batch_name)
+
+
 @dataclass
 class ConfigParams:
     data_direc: Path
@@ -211,7 +239,7 @@ def parse_config_file(config_file: Path) -> ConfigParams:
 
 @process_batch_app.command(
     "run",
-    help="Process a directory of images.",
+    help="Run the batch processing.",
     epilog=f"Example: {name} process-batch config --config-file configjob.toml --max-workers 10",
 )
 def process_batch(
@@ -219,7 +247,7 @@ def process_batch(
         ...,
         "--config-file",
         "-c",
-        help=f"Path to configuration file. Generate a config file using `{name} process-batch config`",
+        help=f"Path to configuration file. Generate a config file using `{name} {process_batch_name} config`",
     ),
     max_workers: Optional[int] = typer.Option(
         None,
@@ -271,25 +299,6 @@ def process_batch(
         # Wait for all threads to complete
         for future in futures:
             future.result()
-
-
-@app.command(help="Get the bounding box x1, y1, x2, y2 from a CSV file.")
-def get_bbox(
-    datafile: Annotated[Path, typer.Argument()],
-    index: Annotated[str, typer.Argument()],
-    index_col: Annotated[str, typer.Option()] = "location",
-    colnames: Annotated[list[str], typer.Option()] = [
-        "left_x",
-        "lower_y",
-        "right_x",
-        "top_y",
-    ],
-    separator: Annotated[str, typer.Option()] = ",",
-):
-
-    df = pandas.read_csv(datafile, index_col=index_col)
-    output = separator.join(str(s) for s in list(df.loc[index][colnames]))
-    print(output)
 
 
 @process_batch_app.command(
