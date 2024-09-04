@@ -11,7 +11,7 @@ pipx install cylc-rose --include-deps  # this will install cylc and rose
 ```
 
 ## Cylc
-To run the `cylc` workflow with the test data, run:
+To run the `cylc` workflow with the defaults from [rose-suite.conf](./rose-suite.conf), run:
 ```bash
 name=sampled-examples
 cylc stop "${name}/*";
@@ -20,6 +20,8 @@ cylc tui ${name}
 ```
 
 ## Run a single example using the workflow
+
+The parameters from rose-suite.conf can be overridden on the command line:
 
 ```bash
 name=single-example
@@ -32,7 +34,7 @@ cylc tui ${name}
 
 ## Looping through the case list
 
-Run the processing at a particular scale.
+To loop through a list of cases, and process each at a particular `scale` (in metres):
 
 ```bash
 name=sampled-examples
