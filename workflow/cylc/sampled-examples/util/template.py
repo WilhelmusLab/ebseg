@@ -14,18 +14,22 @@ import typer
 
 def main(datafile: pathlib.Path, index_col: str, index_val: str):
     """
+    Get the cylc parameters for a preprocessing run from a CSV file.
+
+
+    
     Examples:
         >>> import io
         >>> csv = (
-        ... '''fullname,location,size,center_lat,center_lon,top_left_lat,top_left_lon,lower_right_lat,lower_right_lon,left_x,right_x,lower_y,top_y,startdate,enddate
-        ... 998-beaufort_sea,beaufort_sea,1200km,,,-152.9892,67.6236,-114.8220,78.9424,-2334051,-1127689,-414418,757892,2006-05-04,2006-05-06
-        ... 999-beaufort_sea,beaufort_sea,1200km,,,-152.9892,67.6236,-114.8220,78.9424,-2334051,-1127689,-414418,757892,2008-07-13,2008-07-15
+        ... '''id,location,center_lat,center_lon,top_left_lat,top_left_lon,lower_right_lat,lower_right_lon,left_x,right_x,lower_y,top_y,startdate,enddate
+        ... beaufort_sea,beaufort_sea,75,-135,67.22298,-152.46426,79.32881,-94.68433,-2383879,-883879,-750000,750000,2020-09-05,2020-09-08
+        ... hudson_bay,hudson_bay,60,-83,59.65687,-101.24295,57.54266,-66.04186,-2795941,-1295941,-3368686,-1868686,2020-09-06,2020-09-09
         ... ''')
-        >>> main(io.StringIO(csv), index_col="fullname", index_val="998-beaufort_sea")
-        --icp 2006-05-04 --fcp 2006-05-06 --set BBOX="-2334051,-414418,-1127689,757892" --set LOCATION="beaufort_sea"
+        >>> main(io.StringIO(csv), index_col="id", index_val="beaufort_sea")
+        --icp 2020-09-05 --fcp 2020-09-08 --set BBOX="-2383879,-750000,-883879,750000" --set LOCATION="beaufort_sea"
         
-        >>> main(io.StringIO(csv), index_col="fullname", index_val="999-beaufort_sea")
-        --icp 2008-07-13 --fcp 2008-07-15 --set BBOX="-2334051,-414418,-1127689,757892" --set LOCATION="beaufort_sea"
+        >>> main(io.StringIO(csv), index_col="id", index_val="hudson_bay")
+        --icp 2020-09-06 --fcp 2020-09-09 --set BBOX="-2795941,-3368686,-1295941,-1868686" --set LOCATION="hudson_bay"
 
     """
     df = pandas.read_csv(datafile, index_col=index_col)
