@@ -38,9 +38,21 @@ def _rescale(x1: int | float, x2: int | float, scale: int | float) -> int:
         >>> _rescale(0, 100, 10)
         10
 
+        >>> _rescale(0, 1, 0.5)
+        2
+
+        >>> _rescale(0, 100_000, 250)
+        400
+
+        >>> _rescale(0, 100_000, 256)
+        391
+
+        >>> _rescale(0, 100_000, 255)
+        392
+
     """
     length = abs(x2 - x1)
-    rescaled_length = int(length / scale)
+    rescaled_length = int(round(length / scale))
     return rescaled_length
 
 
@@ -56,6 +68,9 @@ def _get_width_height(
 
         >>> _get_width_height(BoundingBox(0, 0, 10, 50), 5)
         (2, 10)
+
+        >>> _get_width_height(BoundingBox(0, 0, 100_000, 100_000), 256)
+        (391, 391)
 
     """
     width = _rescale(bbox.x1, bbox.x2, scale)
