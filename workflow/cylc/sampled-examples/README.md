@@ -19,15 +19,6 @@ cylc vip . -n ${name}
 cylc tui ${name}
 ```
 
-## OSCAR
-
-The same Cylc configuration can be used on OSCAR, with the settings in `cylc/oscar/global.cylc`.
-Install those using:
-```bash
-mkdir -p ~/.cylc/flow
-cp ./cylc/oscar/global.cylc ~/.cylc/flow/global.cylc
-```
-
 ## Run a single example using the workflow
 
 ```bash
