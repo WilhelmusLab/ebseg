@@ -1,3 +1,7 @@
+# Beaufort Sea, Hudson Bay
+
+Run the ebseg pipeline on Beaufort Sea and Hudson Bay.
+
 ## Cylc
 To run the `cylc` workflow with the test data, run:
 ```bash

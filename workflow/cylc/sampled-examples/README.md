@@ -1,3 +1,7 @@
+# Sampled examples
+
+Run the ebseg pipeline on the domains listed in [all-cases.csv](./all-cases.csv).
+
 ## Rose
 
 Installation:
