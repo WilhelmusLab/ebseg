@@ -8,6 +8,7 @@ from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Annotated, Optional
+import io
 
 import pandas
 import typer
@@ -36,6 +37,8 @@ app = typer.Typer(
     https://doi.org/10.5194/egusphere-2024-89, 2024.
     """,
 )
+process_batch_app = typer.Typer(help="Process a directory of images.")
+app.add_typer(process_batch_app, name="process-batch")
 
 
 @app.callback()
@@ -206,16 +209,17 @@ def parse_config_file(config_file: Path) -> ConfigParams:
     return ConfigParams(**defaults)
 
 
-@app.command(
+@process_batch_app.command(
+    "run",
     help="Process a directory of images.",
-    epilog=f"Example: {name} --data-direc /path/to/data --save-figs --save-direc /path/to/save --land /path/to/landfile",
+    epilog=f"Example: {name} process-batch config --config-file configjob.toml --max-workers 10",
 )
 def process_batch(
     config_file: Path = typer.Option(
         ...,
         "--config-file",
         "-c",
-        help="Path to configuration file",
+        help=f"Path to configuration file. Generate a config file using `{name} process-batch config`",
     ),
     max_workers: Optional[int] = typer.Option(
         None,
@@ -286,6 +290,34 @@ def get_bbox(
     df = pandas.read_csv(datafile, index_col=index_col)
     output = separator.join(str(s) for s in list(df.loc[index][colnames]))
     print(output)
+
+
+@process_batch_app.command(
+    "config",
+    help="Write a configuration file for the `run` command.",
+)
+def process_batch_create_config(
+    config_file: Path = typer.Argument(
+        help="Path to configuration file",
+    )
+):
+    default_configuration = """# Configuration file for fsdproc CLI
+
+# data_direc must contain the folders `cloud`, `tci`
+data_direc = "tests/input"
+save_figs = true
+save_direc = "temp"                   # directory to save figures
+land = "tests/input/reproj_land.tiff" # land mask to use
+
+[erosion]
+itmax = 8                 # maximum number of iterations for erosion
+itmin = 3                 # (inclusive) minimum number of iterations for erosion
+step = -1
+kernel_type = "diamond" # "ellipse" also supported
+kernel_size = 1
+"""
+    with open(config_file, "w") as f:
+        f.write(default_configuration)
 
 
 if __name__ == "__main__":
