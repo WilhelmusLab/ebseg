@@ -37,18 +37,20 @@ cylc tui ${name}
 
 ## Looping through the case list
 
-```bash
-cylc stop sampled-examples/*;
-cylc clean sampled-examples -y
-```
+Run the processing at a particular scale.
 
 ```bash
+name=sampled-examples
+
+cylc stop ${name}/*;
+cylc clean ${name} -y
+
+scale=250
 datafile="all-cases.csv"
 index_col="fullname"
-for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}" --start 50 --stop 51); 
+for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}" --start 50 --stop 53); 
 do   
-  cylc install . --run-name=${fullname}
-  cylc play sampled-examples/${fullname} $(pipx run util/template.py ${datafile} ${index_col} ${fullname}); 
+  cylc vip . -n ${name} --run-name=${fullname}-${scale}m $(pipx run util/template.py ${datafile} ${index_col} ${fullname}); 
 done
 
 cylc tui
@@ -56,41 +58,12 @@ cylc tui
 
 Copy all the output files to the /output directory
 ```bash
-rundir="${HOME}/cylc-run/sampled-examples"
+rundir="${HOME}/cylc-run/${name}"
+targetdir="output/${scale}m/"
+mkdir -p ${targetdir}
 for dir in ${rundir}/*/share/*/
 do
-  echo $dir
-  cp -r $dir output/
-  sleep 0.1
+  cp -r $dir ${targetdir}
+  sleep 0.01
 done
-```
-
-## Running the case list using a 256m pixel size
-
-```bash
-scale=256
-datafile="all-cases.csv"
-index_col="fullname"
-for fullname in $(pipx run util/get_fullnames.py "${datafile}" "${index_col}" --start 50 --stop 51); 
-do   
-  cylc install . --run-name=${fullname}-${scale}m 
-  cylc play sampled-examples/${fullname}-${scale}m --set SCALE=${scale} $(pipx run util/template.py ${datafile} ${index_col} ${fullname});
-done
-```
-
-Copy all the output files to the /output directory
-```bash
-
-rundir="${HOME}/cylc-run/sampled-examples"
-targetdir="/oscar/data/mmart119/jholla10/ebseg/output/256m"
-for run in ${rundir}/*/
-do
-  mkdir "${targetdir}/$(basename $run)/"
-  
-  for datadir in ${run}share/*
-  do
-    cp -r ${datadir}/ "${targetdir}/$(basename $run)/."
-  done;
-  sleep 0.1
-done;
 ```
