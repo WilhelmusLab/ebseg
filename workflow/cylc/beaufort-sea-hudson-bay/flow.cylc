@@ -9,28 +9,14 @@
     final cycle point = 2016-06-01
     
     [[graph]]
-        
-        R1 = """
-            setup
-        """
-        
         P1D = """
-            setup[^] => load<location> => preprocess<location>
+            load<location> => preprocess<location>
         """
 
 [runtime]
     [[root]]
         [[[environment]]]
-            VENV="$CYLC_WORKFLOW_SHARE_DIR/venv"
-            PYTHON="${VENV}/bin/python"
-            FSDPROC="${VENV}/bin/fsdproc --debug"
-    
-    [[setup]]
-        script = """
-            python3.11 -m venv "$VENV"
-            . "${VENV}/bin/activate"
-            pip install "$CYLC_WORKFLOW_RUN_DIR"
-        """
+            FSDPROC="pipx run --spec git+https://github.com/WilhelmusLab/ebseg.git@main fsdproc --debug"
     
     [[<location>]]
         [[[environment]]]
