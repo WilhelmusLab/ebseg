@@ -54,11 +54,13 @@ class BoundingBoxParser(click.ParamType):
             >>> BoundingBoxParser.convert("-2334051.0214676396, -414387.78951688844, -1127689.8419350237, 757861.8364224486")
             BoundingBox(x1=-2334051.0214676396, y1=-414387.78951688844, x2=-1127689.8419350237, y2=757861.8364224486)
 
-
-
-
+            >>> BoundingBoxParser.convert(BoundingBox(-2334051, -414387, -1127689, 757861,))
+            BoundingBox(x1=-2334051, y1=-414387, x2=-1127689, y2=757861)
 
         """
-        raw_value = ast.literal_eval(value)
-        value = BoundingBox(*raw_value)
+        if isinstance(value, str):
+            raw_value = ast.literal_eval(value)
+            value = BoundingBox(*raw_value)
+        elif isinstance(value, BoundingBox):
+            pass
         return value
