@@ -138,6 +138,8 @@ def get_region_properties(img: ArrayLike, red_c: ArrayLike) -> dict[str, ArrayLi
         properties=[
             "label",
             "area",
+            "area_convex",
+            "bbox",
             "centroid",
             "axis_major_length",
             "axis_minor_length",
@@ -146,7 +148,20 @@ def get_region_properties(img: ArrayLike, red_c: ArrayLike) -> dict[str, ArrayLi
             "intensity_mean",
         ],
     )
-    return props
+
+    props_renamed = {}
+    props_renamed["label"] = props["label"]
+    props_renamed["area"] = props["area"]
+    props_renamed["convex_area"] = props["area_convex"]
+    props_renamed["min_row"], props_renamed["min_col"], props_renamed["max_row"], props_renamed["max_col"] = props["bbox"]
+    props_renamed["row_centroid"], props_renamed["col_centroid"] = props["centroid"]
+    props_renamed["major_axis_length"] = props["axis_major_length"]
+    props_renamed["minor_axis_length"] = props["axis_minor_length"]
+    props_renamed["orientation"] = props["orientation"]
+    props_renamed["perimiter"] = props["perimiter"]
+    props_renamed["intensity_mean"] = props["intensity_mean"]
+
+    return props_renamed
 
 
 def get_wcuts(red_masked):
