@@ -2,6 +2,9 @@
 *.tif
 *.tiff
 
+# Project specific directories
+temp/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

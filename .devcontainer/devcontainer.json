@@ -13,7 +13,7 @@
 		},
 		"ghcr.io/devcontainers-contrib/features/pipx-package:1": {
 			"includeDeps": true,
-			"package": "cylc-flow",
+			"package": "cylc-rose",
 			"interpreter": "python3.11"
 		}
 	},
