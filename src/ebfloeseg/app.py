@@ -63,6 +63,25 @@ def main(
     return
 
 
+@app.command(help="Get the bounding box x1, y1, x2, y2 from a CSV file.")
+def get_bbox(
+    datafile: Annotated[Path, typer.Argument()],
+    index: Annotated[str, typer.Argument()],
+    index_col: Annotated[str, typer.Option()] = "location",
+    colnames: Annotated[list[str], typer.Option()] = [
+        "left_x",
+        "lower_y",
+        "right_x",
+        "top_y",
+    ],
+    separator: Annotated[str, typer.Option()] = ",",
+):
+
+    df = pandas.read_csv(datafile, index_col=index_col)
+    output = separator.join(str(s) for s in list(df.loc[index][colnames]))
+    print(output)
+
+
 @app.command(help="Download an image.")
 def load(
     outfile: Annotated[Path, typer.Argument()],
@@ -153,6 +172,18 @@ def process(
     return
 
 
+process_batch_name = "process-batch"
+process_batch_app = typer.Typer(
+    help="Process a directory of images.",
+    epilog=f"""
+Example:\n
+{name} {process_batch_name} config -c configjob.toml\n
+{name} {process_batch_name} run -c configjob.toml
+""",
+)
+app.add_typer(process_batch_app, name=process_batch_name)
+
+
 @dataclass
 class ConfigParams:
     data_direc: Path
@@ -206,16 +237,17 @@ def parse_config_file(config_file: Path) -> ConfigParams:
     return ConfigParams(**defaults)
 
 
-@app.command(
-    help="Process a directory of images.",
-    epilog=f"Example: {name} --data-direc /path/to/data --save-figs --save-direc /path/to/save --land /path/to/landfile",
+@process_batch_app.command(
+    "run",
+    help="Run the batch processing.",
+    epilog=f"Example: {name} process-batch config --config-file configjob.toml --max-workers 10",
 )
 def process_batch(
     config_file: Path = typer.Option(
         ...,
         "--config-file",
         "-c",
-        help="Path to configuration file",
+        help=f"Path to configuration file. Generate a config file using `{name} {process_batch_name} config`",
     ),
     max_workers: Optional[int] = typer.Option(
         None,
@@ -269,23 +301,32 @@ def process_batch(
             future.result()
 
 
-@app.command(help="Get the bounding box x1, y1, x2, y2 from a CSV file.")
-def get_bbox(
-    datafile: Annotated[Path, typer.Argument()],
-    index: Annotated[str, typer.Argument()],
-    index_col: Annotated[str, typer.Option()] = "location",
-    colnames: Annotated[list[str], typer.Option()] = [
-        "left_x",
-        "lower_y",
-        "right_x",
-        "top_y",
-    ],
-    separator: Annotated[str, typer.Option()] = ",",
+@process_batch_app.command(
+    "config",
+    help="Write a configuration file for the `run` command.",
+)
+def process_batch_create_config(
+    config_file: Path = typer.Argument(
+        help="Path to configuration file",
+    )
 ):
+    default_configuration = """# Configuration file for fsdproc CLI
 
-    df = pandas.read_csv(datafile, index_col=index_col)
-    output = separator.join(str(s) for s in list(df.loc[index][colnames]))
-    print(output)
+# data_direc must contain the folders `cloud`, `tci`
+data_direc = "tests/input"
+save_figs = true
+save_direc = "temp"                   # directory to save figures
+land = "tests/input/reproj_land.tiff" # land mask to use
+
+[erosion]
+itmax = 8                 # maximum number of iterations for erosion
+itmin = 3                 # (inclusive) minimum number of iterations for erosion
+step = -1
+kernel_type = "diamond" # "ellipse" also supported
+kernel_size = 1
+"""
+    with open(config_file, "w") as f:
+        f.write(default_configuration)
 
 
 if __name__ == "__main__":

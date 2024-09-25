@@ -74,6 +74,7 @@ def test_fsdproc(tmpdir):
         [
             "fsdproc",
             "process-batch",
+            "run",
             "--config-file",
             str(config_file),
         ],
