@@ -18,6 +18,7 @@ class ImageType(str, Enum):
     truecolor = "truecolor"
     cloud = "cloud"
     landmask = "landmask"
+    bands721 = "bands721"
 
 
 class Satellite(str, Enum):
@@ -158,10 +159,14 @@ def load(
             layers = "MODIS_Terra_CorrectedReflectance_TrueColor"
         case (Satellite.terra, ImageType.cloud):
             layers = "MODIS_Terra_Cloud_Fraction_Day"
+        case (Satellite.terra, ImageType.bands721):
+            layers = "MODIS_Terra_CorrectedReflectance_Bands721"
         case (Satellite.aqua, ImageType.truecolor):
             layers = "MODIS_Aqua_CorrectedReflectance_TrueColor"
         case (Satellite.aqua, ImageType.cloud):
             layers = "MODIS_Aqua_Cloud_Fraction_Day"
+        case (Satellite.aqua, ImageType.bands721):
+            layers = "MODIS_Aqua_CorrectedReflectance_Bands721"
         case (_, ImageType.landmask):
             layers = "OSM_Land_Mask"
         case _:
