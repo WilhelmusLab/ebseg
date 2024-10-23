@@ -57,10 +57,19 @@ class BoundingBoxParser(click.ParamType):
             >>> BoundingBoxParser.convert(BoundingBox(-2334051, -414387, -1127689, 757861,))
             BoundingBox(x1=-2334051, y1=-414387, x2=-1127689, y2=757861)
 
+            >>> BoundingBoxParser.convert((1, 2, 3, 4))
+            Traceback (most recent call last):
+            ...
+            NotImplementedError: (1, 2, 3, 4), of type <class 'tuple'>, can't be parsed as a BoundingBox
+
+
         """
-        if isinstance(value, str):
+        if isinstance(value, BoundingBox):
+            pass  # the value is the correct type
+        elif isinstance(value, str):
             raw_value = ast.literal_eval(value)
             value = BoundingBox(*raw_value)
-        elif isinstance(value, BoundingBox):
-            pass
+        else: 
+            msg = "%s, of type %s, can't be parsed as a BoundingBox" % (value, type(value))
+            raise NotImplementedError(msg)
         return value
