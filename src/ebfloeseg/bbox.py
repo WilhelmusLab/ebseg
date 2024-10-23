@@ -15,7 +15,7 @@ class BoundingBoxParser(click.ParamType):
     name = "X1,Y1,X2,Y2"
 
     @classmethod
-    def convert(self, value, param=None, ctx=None):
+    def convert(self, value: str | BoundingBox, param=None, ctx=None):
         """
         Examples:
             We can parse integers separated by commas:
