@@ -155,7 +155,7 @@ def get_region_properties(img: ArrayLike, red_c: ArrayLike) -> dict[str, ArrayLi
         "convex_area": "area_convex",
         "min_row": "bbox-0",
         "min_col": "bbox-1",
-        "max_row": "bbox-2",        
+        "max_row": "bbox-2",
         "max_col": "bbox-3",
         "row_centroid": "centroid-0",
         "col_centroid": "centroid-1",
