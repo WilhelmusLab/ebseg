@@ -69,7 +69,10 @@ class BoundingBoxParser(click.ParamType):
         elif isinstance(value, str):
             raw_value = ast.literal_eval(value)
             value = BoundingBox(*raw_value)
-        else: 
-            msg = "%s, of type %s, can't be parsed as a BoundingBox" % (value, type(value))
+        else:
+            msg = "%s, of type %s, can't be parsed as a BoundingBox" % (
+                value,
+                type(value),
+            )
             raise NotImplementedError(msg)
         return value
