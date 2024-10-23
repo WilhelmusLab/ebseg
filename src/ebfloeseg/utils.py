@@ -149,21 +149,23 @@ def get_region_properties(img: ArrayLike, red_c: ArrayLike) -> dict[str, ArrayLi
         ],
     )
 
-    props_renamed = {}
-    props_renamed["label"] = props["label"]
-    props_renamed["area"] = props["area"]
-    props_renamed["convex_area"] = props["area_convex"]
-    props_renamed["min_row"] = props["bbox-0"]
-    props_renamed["min_col"] = props["bbox-1"]
-    props_renamed["max_row"] = props["bbox-2"]
-    props_renamed["max_col"] = props["bbox-3"]
-    props_renamed["row_centroid"] = props["centroid-0"]
-    props_renamed["col_centroid"] = props["centroid-1"]
-    props_renamed["major_axis_length"] = props["axis_major_length"]
-    props_renamed["minor_axis_length"] = props["axis_minor_length"]
-    props_renamed["orientation"] = props["orientation"]
-    props_renamed["perimeter"] = props["perimeter"]
-    props_renamed["intensity_mean"] = props["intensity_mean"]
+    mapping = {
+        "label": "label",
+        "area": "area",
+        "convex_area": "area_convex",
+        "min_row": "bbox-0",
+        "min_col": "bbox-1",
+        "max_row": "bbox-2",        
+        "max_col": "bbox-3",
+        "row_centroid": "centroid-0",
+        "col_centroid": "centroid-1",
+        "major_axis_length": "axis_major_length",
+        "minor_axis_length": "axis_minor_length",
+        "orientation": "orientation",
+        "perimeter": "perimeter",
+        "intensity_mean": "intensity_mean",
+    }
+    props_renamed = {new_key: props[old_key] for new_key, old_key in mapping.items()}
 
     return props_renamed
 
