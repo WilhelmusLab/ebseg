@@ -1,5 +1,6 @@
 # Project specific file types
-*.tif[f]
+*.tif
+*.tiff
 
 # Project specific directories
 temp/
