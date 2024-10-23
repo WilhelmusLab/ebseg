@@ -52,13 +52,14 @@ class BoundingBoxParser(click.ParamType):
             >>> BoundingBoxParser.convert("(1.2,  2.4, 3, 4)")
             BoundingBox(x1=1.2, y1=2.4, x2=3, y2=4)
 
-
             >>> BoundingBoxParser.convert("-2334051.0214676396, -414387.78951688844, -1127689.8419350237, 757861.8364224486")
             BoundingBox(x1=-2334051.0214676396, y1=-414387.78951688844, x2=-1127689.8419350237, y2=757861.8364224486)
 
+            If passed a bounding box instance, then return the same object:
             >>> BoundingBoxParser.convert(BoundingBox(-2334051, -414387, -1127689, 757861,))
             BoundingBox(x1=-2334051, y1=-414387, x2=-1127689, y2=757861)
 
+            If the method is passed something other than a string or a bounding box, it throws an error.
             >>> BoundingBoxParser.convert((1, 2, 3, 4))
             Traceback (most recent call last):
             ...
@@ -67,14 +68,14 @@ class BoundingBoxParser(click.ParamType):
 
         """
         if isinstance(value, BoundingBox):
-            pass  # the value is the correct type
+            return value
         elif isinstance(value, str):
             raw_value = ast.literal_eval(value)
             value = BoundingBox(*raw_value)
+            return value
         else:
             msg = "%s, of type %s, can't be parsed as a BoundingBox" % (
                 value,
                 type(value),
             )
             raise NotImplementedError(msg)
-        return value
