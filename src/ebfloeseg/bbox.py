@@ -17,6 +17,8 @@ class BoundingBoxParser(click.ParamType):
     @classmethod
     def convert(self, value: str | BoundingBox, param=None, ctx=None):
         """
+        Convert a string compatible with the interface for a BoundingBox into a BoundingBox instance
+
         Examples:
             We can parse integers separated by commas:
             >>> BoundingBoxParser.convert("1,2,3,4")
