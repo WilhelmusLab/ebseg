@@ -62,7 +62,7 @@ def test_get_region_properties():
     props = get_region_properties(img, red_c)
     assert "label" in props
     assert "area" in props
-    assert "centroid-0" in props
+    assert "row_centroid" in props
 
 
 def test_imshow():

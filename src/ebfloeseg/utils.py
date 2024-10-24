@@ -138,6 +138,8 @@ def get_region_properties(img: ArrayLike, red_c: ArrayLike) -> dict[str, ArrayLi
         properties=[
             "label",
             "area",
+            "area_convex",
+            "bbox",
             "centroid",
             "axis_major_length",
             "axis_minor_length",
@@ -146,7 +148,26 @@ def get_region_properties(img: ArrayLike, red_c: ArrayLike) -> dict[str, ArrayLi
             "intensity_mean",
         ],
     )
-    return props
+
+    mapping = {
+        "label": "label",
+        "area": "area",
+        "convex_area": "area_convex",
+        "min_row": "bbox-0",
+        "min_col": "bbox-1",
+        "max_row": "bbox-2",
+        "max_col": "bbox-3",
+        "row_centroid": "centroid-0",
+        "col_centroid": "centroid-1",
+        "major_axis_length": "axis_major_length",
+        "minor_axis_length": "axis_minor_length",
+        "orientation": "orientation",
+        "perimeter": "perimeter",
+        "intensity_mean": "intensity_mean",
+    }
+    props_renamed = {new_key: props[old_key] for new_key, old_key in mapping.items()}
+
+    return props_renamed
 
 
 def get_wcuts(red_masked):
