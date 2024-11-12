@@ -220,7 +220,7 @@ def _preprocess(
                 fname=fname,
                 count=1,
                 rollaxis=False,
-                as_uint8=True,
+                as_uint8=False,
                 res=res,
             )
 
@@ -254,7 +254,7 @@ def _preprocess(
         fname=fname,
         count=1,
         rollaxis=False,
-        as_uint8=True,
+        as_uint8=False,
         res=res,
     )
 
