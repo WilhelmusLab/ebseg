@@ -140,7 +140,7 @@ def _preprocess(
             fname=fname,
             count=1,
             rollaxis=False,
-            as_uint8=True,
+            as_uint8=False,
             res=res,
         )
 
@@ -156,7 +156,7 @@ def _preprocess(
     # TODO: clarify this block
     inp = ice_mask
     input_no = ice_mask
-    output = np.zeros((np.shape(ice_mask)))
+    output = np.zeros((np.shape(ice_mask)), dtype=np.int16)
     itmax = itmax
     itmin = itmin
     step = step
@@ -243,13 +243,14 @@ def _preprocess(
 
     # saving the label floes tif
     fname = "final.tif"
+    assert output.min() >= 0
     if sat:
         fname = f"{sat}_{fname}"
     if fname_prefix:
         fname = f"{fname_prefix}{fname}"
     imsave(
         tci=tci,
-        img=output,
+        img=output.astype(np.uint16),
         save_direc=save_direc,
         fname=fname,
         count=1,
