@@ -66,7 +66,7 @@ def main(
 @app.command(help="Download an image.")
 def load(
     outfile: Annotated[Path, typer.Argument()],
-    datetime: str = ExampleDataSet.datetime,
+    date: str = ExampleDataSet.date,
     wrap: str = ExampleDataSet.wrap,
     satellite: Satellite = ExampleDataSet.satellite,
     kind: ImageType = ExampleDataSet.kind,
@@ -85,7 +85,7 @@ def load(
     _logger.debug(locals())
 
     result = load_(
-        datetime=datetime,
+        date=date,
         wrap=wrap,
         satellite=satellite,
         kind=kind,
