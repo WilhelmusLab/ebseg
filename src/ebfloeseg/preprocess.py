@@ -20,8 +20,8 @@ from ebfloeseg.utils import (
     getmeta,
     getres,
     get_region_properties,
+    smallest_dtype
 )
-
 
 def extract_features(
     output,
@@ -140,7 +140,7 @@ def _preprocess(
             fname=fname,
             count=1,
             rollaxis=False,
-            as_uint8=False,
+            dtype=np.dtype("bool"),
             res=res,
         )
 
@@ -220,7 +220,7 @@ def _preprocess(
                 fname=fname,
                 count=1,
                 rollaxis=False,
-                as_uint8=False,
+                dtype=np.uint8,
                 res=res,
             )
 
@@ -248,14 +248,15 @@ def _preprocess(
         fname = f"{sat}_{fname}"
     if fname_prefix:
         fname = f"{fname_prefix}{fname}"
+    
     imsave(
         tci=tci,
-        img=output.astype(np.uint16),
+        img=output,
         save_direc=save_direc,
         fname=fname,
         count=1,
         rollaxis=False,
-        as_uint8=False,
+        dtype=smallest_dtype(output),
         res=res,
     )
 

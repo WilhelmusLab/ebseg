@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 import logging
 
 import numpy as np
@@ -19,12 +19,13 @@ def imsave(
     count: int = 3,
     compress: str = "lzw",
     rollaxis: bool = True,
-    as_uint8: bool = False,
+    dtype: Optional[np.dtype] = None,
     res=None,
 ) -> None:
     profile = tci.profile
-    del profile["dtype"]
+    
     profile.update(
+        dtype=dtype,
         count=count,
         compress=compress,
     )
@@ -34,25 +35,32 @@ def imsave(
     else:
         fname = save_direc / fname
 
-    _logger.debug(f"{img.dtype=} {profile=} {img.min()} {img.max()}")
-
     if rollaxis:
         img = np.rollaxis(img, axis=2)
         axis = None
-
     else:
         axis = 1
 
-    if img.dtype == np.dtype("bool"):
+    if img.dtype == np.dtype("bool") or dtype == np.dtype("bool"):
         img_ = img.astype(np.uint8)
-        with rasterio.open(fname, "w", dtype=img_.dtype, nbits=1, **profile) as dst:
-            dst.write(img_, axis)
-            return
+        profile.update(
+            dtype=img_.dtype,
+            nbits=1, 
+        )
 
-    else:
-        with rasterio.open(fname, "w", dtype=img.dtype, **profile) as dst:
-            dst.write(img, axis)
-            return
+    elif dtype is not None:  # user set the dtype explicitly and it's not a bool
+        profile.update(
+            dtype=dtype,
+        )
+        
+    else:  # user didn't set the dtype explicitly – use the image dtype
+        profile.update(
+            dtype=img.dtype,
+        )
+    
+    with rasterio.open(fname, "w", **profile) as dst:
+        dst.write(img, axis)
+        return
 
 
 def save_ice_mask_hist(
