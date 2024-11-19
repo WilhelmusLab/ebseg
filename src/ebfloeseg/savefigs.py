@@ -1,11 +1,14 @@
 from pathlib import Path
 from typing import Union
+import logging
 
 import numpy as np
 import rasterio
 from rasterio import DatasetReader
 from numpy.typing import NDArray
 from matplotlib import pyplot as plt
+
+_logger = logging.getLogger(__name__)
 
 
 def imsave(
