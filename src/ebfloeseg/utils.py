@@ -196,7 +196,7 @@ def get_wcuts(red_masked):
 def smallest_dtype(arr: np.array):
     """Find the smallest integer data type that array `arr` can be cast to.
     From: https://stackoverflow.com/a/73688443 by Cedric
-    Modified to reduce the number of np.dtype calls made, 
+    Modified to reduce the number of np.dtype calls made,
     and to add exceptions when the data aren't compatible with the function.
 
     Examples:
@@ -242,15 +242,17 @@ def smallest_dtype(arr: np.array):
 
     """
     if not np.issubdtype(arr.dtype, np.integer):
-        raise NotImplementedError("%s not supported, dtype must be integer" % str(arr.dtype))
-    
+        raise NotImplementedError(
+            "%s not supported, dtype must be integer" % str(arr.dtype)
+        )
+
     arr_min = arr.min()
     arr_max = arr.max()
 
     for dtype in list(map(np.dtype, ["u1", "i1", "u2", "i2", "u4", "i4", "u8", "i8"])):
         if (arr_min >= np.iinfo(dtype).min) and (arr_max <= np.iinfo(dtype).max):
             return dtype
-    
-    # Backstop exception – should never return nothing silently. 
+
+    # Backstop exception – should never return nothing silently.
     # I can't think of a time when this exception will be raised, so I can't test it.
     raise NotImplementedError("no support for min=%s max=%s" % (arr_min, arr_max))

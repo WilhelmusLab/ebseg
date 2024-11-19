@@ -23,7 +23,7 @@ def imsave(
     res=None,
 ) -> None:
     profile = tci.profile
-    
+
     profile.update(
         dtype=dtype,
         count=count,
@@ -45,19 +45,19 @@ def imsave(
         img_ = img.astype(np.uint8)
         profile.update(
             dtype=img_.dtype,
-            nbits=1, 
+            nbits=1,
         )
 
     elif dtype is not None:  # user set the dtype explicitly and it's not a bool
         profile.update(
             dtype=dtype,
         )
-        
+
     else:  # user didn't set the dtype explicitly – use the image dtype
         profile.update(
             dtype=img.dtype,
         )
-    
+
     with rasterio.open(fname, "w", **profile) as dst:
         dst.write(img, axis)
         return
