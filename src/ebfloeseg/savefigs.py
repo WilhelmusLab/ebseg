@@ -23,8 +23,8 @@ def imsave(
     res=None,
 ) -> None:
     profile = tci.profile
+    del profile["dtype"]
     profile.update(
-        dtype=rasterio.uint8,  # sample images are uint8; might not be needed? CP
         count=count,
         compress=compress,
     )
@@ -34,15 +34,25 @@ def imsave(
     else:
         fname = save_direc / fname
 
-    with rasterio.open(fname, "w", **profile) as dst:
-        if rollaxis:
-            img = np.rollaxis(img, axis=2)
-            dst.write(img)
+    _logger.debug(f"{img.dtype=} {profile=} {img.min()} {img.max()}")
+
+    if rollaxis:
+        img = np.rollaxis(img, axis=2)
+        axis = None
+
+    else:
+        axis = 1
+
+    if img.dtype == np.dtype("bool"):
+        img_ = img.astype(np.uint8)
+        with rasterio.open(fname, "w", dtype=img_.dtype, nbits=1, **profile) as dst:
+            dst.write(img_, axis)
             return
 
-        if as_uint8:
-            img = img.astype(np.uint8)
-            dst.write(img, 1)
+    else:
+        with rasterio.open(fname, "w", dtype=img.dtype, **profile) as dst:
+            dst.write(img, axis)
+            return
 
 
 def save_ice_mask_hist(
