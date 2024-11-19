@@ -191,3 +191,66 @@ def get_wcuts(red_masked):
         ow_cut_max = rmax_n - 10
 
     return ow_cut_min, ow_cut_max, bins
+
+
+def smallest_dtype(arr: np.array):
+    """Find the smallest integer data type that array `arr` can be cast to.
+    From: https://stackoverflow.com/a/73688443 by Cedric
+    Modified to reduce the number of np.dtype calls made, 
+    and to add exceptions when the data aren't compatible with the function.
+
+    Examples:
+        >>> smallest_dtype(np.array(0))
+        dtype('uint8')
+
+        >>> smallest_dtype(np.array(-1))
+        dtype('int8')
+
+        >>> smallest_dtype(np.array(2**8 - 1))
+        dtype('uint8')
+
+        >>> smallest_dtype(np.array(2**8))
+        dtype('uint16')
+
+        >>> smallest_dtype(np.array(2**16-1))
+        dtype('uint16')
+
+        >>> smallest_dtype(np.array(2**16))
+        dtype('uint32')
+
+        >>> smallest_dtype(np.array(2**32-1))
+        dtype('uint32')
+
+        >>> smallest_dtype(np.array(-2**31+1))
+        dtype('int32')
+
+        >>> smallest_dtype(np.array(2**32))
+        dtype('uint64')
+
+        >>> smallest_dtype(np.array(2**64-1))
+        dtype('uint64')
+
+        >>> smallest_dtype(np.array(2**64))
+        Traceback (most recent call last):
+        ...
+        NotImplementedError: object not supported, dtype must be integer
+
+        >>> smallest_dtype(np.array(0.1))
+        Traceback (most recent call last):
+        ...
+        NotImplementedError: float64 not supported, dtype must be integer
+
+    """
+    if not np.issubdtype(arr.dtype, np.integer):
+        raise NotImplementedError("%s not supported, dtype must be integer" % str(arr.dtype))
+    
+    arr_min = arr.min()
+    arr_max = arr.max()
+
+    for dtype in list(map(np.dtype, ["u1", "i1", "u2", "i2", "u4", "i4", "u8", "i8"])):
+        if (arr_min >= np.iinfo(dtype).min) and (arr_max <= np.iinfo(dtype).max):
+            return dtype
+    
+    # Backstop exception – should never return nothing silently. 
+    # I can't think of a time when this exception will be raised, so I can't test it.
+    raise NotImplementedError("no support for min=%s max=%s" % (arr_min, arr_max))
