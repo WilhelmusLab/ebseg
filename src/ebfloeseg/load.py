@@ -98,6 +98,14 @@ def alpha_not_empty(img: rasterio.DatasetReader):
     alpha_c = img.read()[alpha_index]
     return np.any(alpha_c)
 
+def image_can_be_read_without_errors(img: rasterio.DatasetReader):
+    try:
+        img.read()
+        return True
+    except rasterio.RasterioIOError as e:
+        _logger.warning(e, exc_info=True)
+        return False
+
 
 LoadResult = namedtuple("LoadResult", ["content", "img"])
 
@@ -195,6 +203,7 @@ def load(
     img = rasterio.open(io.BytesIO(r.content))
 
     if validate:
+        assert image_can_be_read_without_errors(img)
         match (kind):
             case ImageType.truecolor | ImageType.cloud:
                 assert image_not_empty(img), "image is empty"
