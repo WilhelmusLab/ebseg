@@ -98,6 +98,7 @@ def alpha_not_empty(img: rasterio.DatasetReader):
     alpha_c = img.read()[alpha_index]
     return np.any(alpha_c)
 
+
 def image_can_be_read_without_errors(img: rasterio.DatasetReader):
     try:
         img.read()
