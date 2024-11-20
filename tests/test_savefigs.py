@@ -19,14 +19,14 @@ def test_imsave(tmp_path):
         imsave(tci, img, tmp_path, "fnameres", count=3, res="res")
         assert tmp_path.joinpath("res_fnameres").exists()
 
-        # test with as_uint8
+        # test with explicit type setting
         imsave(
             tci,
             img[:, :, 1],
             tmp_path,
             "fnameuint8",
             count=1,
-            as_uint8=True,
+            dtype=np.uint8,
             rollaxis=False,
         )
         assert tmp_path.joinpath("fnameuint8").exists()
