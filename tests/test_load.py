@@ -19,7 +19,7 @@ def are_equal(b1: BytesIO, p2: Path):
 
 
 ExampleDataSetBeaufortSea = DataSet(
-    datetime="2016-07-01T00:00:00Z",
+    date="2016-07-01",
     wrap="day",
     satellite=Satellite.terra,
     kind=ImageType.truecolor,

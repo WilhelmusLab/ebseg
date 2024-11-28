@@ -113,7 +113,7 @@ LoadResult = namedtuple("LoadResult", ["content", "img"])
 
 @dataclass
 class DataSet:
-    datetime: str
+    date: str
     wrap: str
     satellite: Satellite
     kind: ImageType
@@ -133,7 +133,7 @@ class DataSet:
 
 
 ExampleDataSetBeaufortSea = DataSet(
-    datetime="2016-07-01T00:00:00Z",
+    date="2016-07-01",
     wrap="day",
     satellite=Satellite.terra,
     kind=ImageType.truecolor,
@@ -150,7 +150,7 @@ ExampleDataSetBeaufortSea = DataSet(
 
 
 def load(
-    datetime: str = ExampleDataSetBeaufortSea.datetime,
+    date: str = ExampleDataSetBeaufortSea.date,
     wrap: str = ExampleDataSetBeaufortSea.wrap,
     satellite: Satellite = ExampleDataSetBeaufortSea.satellite,
     kind: ImageType = ExampleDataSetBeaufortSea.kind,
@@ -188,7 +188,7 @@ def load(
     url = f"https://wvs.earthdata.nasa.gov/api/v1/snapshot"
     payload = {
         "REQUEST": "GetSnapshot",
-        "TIME": datetime,
+        "TIME": date,
         "BBOX": f"{bbox.x1},{bbox.y1},{bbox.x2},{bbox.y2}",
         "CRS": crs,
         "LAYERS": layers,
