@@ -249,8 +249,10 @@ def smallest_dtype(arr: np.array):
     arr_min = arr.min()
     arr_max = arr.max()
 
-    for dtype in list(map(np.dtype, ["u1", "i1", "u2", "i2", "u4", "i4", "u8", "i8"])):
-        if (arr_min >= np.iinfo(dtype).min) and (arr_max <= np.iinfo(dtype).max):
+    int_types = ["u1", "i1", "u2", "i2", "u4", "i4", "u8", "i8"]
+    for dtype in map(np.dtype, int_types):
+        dtinfo = np.iinfo(dtype)
+        if (arr_min >= dtinfo.min) and (arr_max <= dtinfo.max):
             return dtype
 
     # Backstop exception – should never return nothing silently.
