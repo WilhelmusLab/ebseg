@@ -141,7 +141,7 @@ def _preprocess(
             fname=fname,
             count=1,
             rollaxis=False,
-            dtype=np.dtype("bool"),
+            dtype=np.bool_,
             res=res,
         )
 
