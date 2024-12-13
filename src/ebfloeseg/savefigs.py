@@ -41,7 +41,7 @@ def imsave(
     else:
         axis = 1
 
-    if img.dtype == np.dtype("bool") or dtype == np.dtype("bool"):
+    if np.issubdtype(img.dtype, np.bool_) or np.issubdtype(dtype, np.bool_):
         img_ = img.astype(np.uint8)
         profile.update(
             dtype=img_.dtype,
