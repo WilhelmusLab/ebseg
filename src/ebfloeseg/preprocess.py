@@ -20,6 +20,7 @@ from ebfloeseg.utils import (
     getmeta,
     getres,
     get_region_properties,
+    smallest_dtype,
 )
 
 
@@ -140,7 +141,7 @@ def _preprocess(
             fname=fname,
             count=1,
             rollaxis=False,
-            as_uint8=True,
+            dtype=np.bool_,
             res=res,
         )
 
@@ -156,7 +157,7 @@ def _preprocess(
     # TODO: clarify this block
     inp = ice_mask
     input_no = ice_mask
-    output = np.zeros((np.shape(ice_mask)))
+    output = np.zeros((np.shape(ice_mask)), dtype=np.int16)
     itmax = itmax
     itmin = itmin
     step = step
@@ -220,7 +221,7 @@ def _preprocess(
                 fname=fname,
                 count=1,
                 rollaxis=False,
-                as_uint8=True,
+                dtype=np.uint8,
                 res=res,
             )
 
@@ -243,10 +244,14 @@ def _preprocess(
 
     # saving the label floes tif
     fname = "final.tif"
+    assert (
+        output.min() >= 0
+    ), "negative values found, but values should never be smaller than zero"
     if sat:
         fname = f"{sat}_{fname}"
     if fname_prefix:
         fname = f"{fname_prefix}{fname}"
+
     imsave(
         tci=tci,
         img=output,
@@ -254,7 +259,7 @@ def _preprocess(
         fname=fname,
         count=1,
         rollaxis=False,
-        as_uint8=True,
+        dtype=smallest_dtype(output),
         res=res,
     )
 

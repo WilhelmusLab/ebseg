@@ -1,11 +1,14 @@
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
+import logging
 
 import numpy as np
 import rasterio
 from rasterio import DatasetReader
 from numpy.typing import NDArray
 from matplotlib import pyplot as plt
+
+_logger = logging.getLogger(__name__)
 
 
 def imsave(
@@ -16,12 +19,13 @@ def imsave(
     count: int = 3,
     compress: str = "lzw",
     rollaxis: bool = True,
-    as_uint8: bool = False,
+    dtype: Optional[np.dtype] = None,
     res=None,
 ) -> None:
     profile = tci.profile
+
     profile.update(
-        dtype=rasterio.uint8,  # sample images are uint8; might not be needed? CP
+        dtype=dtype,
         count=count,
         compress=compress,
     )
@@ -31,15 +35,32 @@ def imsave(
     else:
         fname = save_direc / fname
 
-    with rasterio.open(fname, "w", **profile) as dst:
-        if rollaxis:
-            img = np.rollaxis(img, axis=2)
-            dst.write(img)
-            return
+    if rollaxis:
+        img = np.rollaxis(img, axis=2)
+        axis = None
+    else:
+        axis = 1
 
-        if as_uint8:
-            img = img.astype(np.uint8)
-            dst.write(img, 1)
+    if np.issubdtype(img.dtype, np.bool_) or np.issubdtype(dtype, np.bool_):
+        img_ = img.astype(np.uint8)
+        profile.update(
+            dtype=img_.dtype,
+            nbits=1,
+        )
+
+    elif dtype is not None:  # user set the dtype explicitly and it's not a bool
+        profile.update(
+            dtype=dtype,
+        )
+
+    else:  # user didn't set the dtype explicitly – use the image dtype
+        profile.update(
+            dtype=img.dtype,
+        )
+
+    with rasterio.open(fname, "w", **profile) as dst:
+        dst.write(img, axis)
+        return
 
 
 def save_ice_mask_hist(
