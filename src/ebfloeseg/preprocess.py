@@ -244,7 +244,7 @@ def _preprocess(
 
     # saving the label floes tif
     fname = "final.tif"
-    assert output.min() >= 0
+    assert output.min() >= 0, "negative values found, but values should never be smaller than zero"
     if sat:
         fname = f"{sat}_{fname}"
     if fname_prefix:
