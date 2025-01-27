@@ -43,11 +43,19 @@ def test_process_exception(tmpdir):
 
 
 @pytest.fixture
-def process_data_directory(tmp_path, date="2012-08-01", day=214, satellite="terra"):
+def batch_process_data_directory(tmp_path, date="2012-08-01", day=214, satellite="terra"):
     test_dir = os.path.dirname(__file__)
     shutil.copyfile(Path(f"{test_dir}/input/reproj_land.tiff"), tmp_path / Path("landmask.tiff"))
     shutil.copyfile(Path(f"{test_dir}/input/tci/tci_{date}_{day}_{satellite}.tiff"), tmp_path / Path("truecolor.tiff"))
     shutil.copyfile(Path(f"{test_dir}/input/cloud/cloud_{date}_{day}_{satellite}.tiff"), tmp_path / Path("cloud.tiff"))
+    return tmp_path
+
+@pytest.fixture
+def process_data_directory(tmp_path):
+    test_dir = os.path.dirname(__file__)
+    shutil.copyfile(Path(f"{test_dir}/process/landmask.tiff"), tmp_path / Path("landmask.tiff"))
+    shutil.copyfile(Path(f"{test_dir}/process/truecolor.tiff"), tmp_path / Path("truecolor.tiff"))
+    shutil.copyfile(Path(f"{test_dir}/process/cloud.tiff"), tmp_path / Path("cloud.tiff"))
     return tmp_path
 
 def test_process_no_duplicated_labels(process_data_directory: Path):
