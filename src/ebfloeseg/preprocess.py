@@ -161,6 +161,8 @@ def _preprocess(
     itmax = itmax
     itmin = itmin
     step = step
+    highest_label_so_far = 0
+
     for r, it in enumerate(range(itmax, itmin - 1, step)):
         # erode a lot at first, decrease number of iterations each time
         eroded_ice_mask = cv2.erode(inp.astype(np.uint8), erosion_kernel, iterations=it)
@@ -171,7 +173,7 @@ def _preprocess(
         )
 
         # label floes remaining after erosion
-        ret, markers = cv2.connectedComponents(eroded_ice_mask.astype(np.uint8))
+        n, markers, _, _ = cv2.connectedComponentsWithStats(eroded_ice_mask.astype(np.uint8))
 
         # Add one to all labels so that sure background is not 0, but 1
         markers = markers + 1
@@ -228,7 +230,9 @@ def _preprocess(
         input_no = ice_mask + inp
         inp = (watershed == 1) & (inp == 1) & ice_mask
         watershed[watershed < 2] = 0
-        output += watershed
+        new_label_mask = watershed > 0
+        output[new_label_mask] = watershed[new_label_mask] + highest_label_so_far
+        highest_label_so_far = np.max(output)
 
     # saving the props table
     output = opening(output)
