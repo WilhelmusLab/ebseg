@@ -173,9 +173,24 @@ def _preprocess(
         )
 
         # label floes remaining after erosion
-        n, markers, _, _ = cv2.connectedComponentsWithStats(eroded_ice_mask.astype(np.uint8))
+        n, markers, _, _ = cv2.connectedComponentsWithStats(
+            eroded_ice_mask.astype(np.uint8)
+        )
         logger.debug(f"\n#-------\n{r=}, {it=}, {n=}, {markers.dtype=}")
-        logger.debug("initial labels:\n%s" % count_blobs_per_label(markers).query("count > 1"))
+        logger.debug(
+            "initial labels:\n%s" % count_blobs_per_label(markers).query("count > 1")
+        )
+        if save_figs:
+            imsave(
+                tci=tci,
+                img=markers,
+                save_direc=save_direc,
+                fname=f"{fname_prefix}identification_round_{r}_initial_labels.tif",
+                count=1,
+                rollaxis=False,
+                res=res,
+                dtype=smallest_dtype(markers),
+            )
 
         # Add one to all labels so that sure background is not 0, but 1
         markers = markers + 1
@@ -187,16 +202,21 @@ def _preprocess(
         # Now, mark the region of unknown with zero
         # markers[unknown == 255] = 0
         mask_image(markers, unknown == 255, 0)
-        logger.debug("after masking unknowns:\n%s" % count_blobs_per_label(markers).query("count > 1"))
+        logger.debug(
+            "after masking unknowns:\n%s"
+            % count_blobs_per_label(markers).query("count > 1")
+        )
 
         # dilate each marker
         for a in np.arange(0, it + 1, 1):
             markers = skimage.morphology.dilation(markers, erosion_kernel)
-        logger.debug("after dilation:\n%s" % count_blobs_per_label(markers).query("count > 1"))
+        logger.debug(
+            "after dilation:\n%s" % count_blobs_per_label(markers).query("count > 1")
+        )
 
         # rewatershed
         watershed = cv2.watershed(rgb_masked, markers)
-        logger.debug(f"{watershed.dtype=}")    
+        logger.debug(f"{watershed.dtype=}")
 
         # get rid of floes that intersect the dilated land mask
         watershed[
@@ -205,13 +225,41 @@ def _preprocess(
                 np.unique(watershed[land_cloud_mask_dilated & (watershed > 1)]),
             )
         ] = 1
-        logger.debug("after removing floes which intersect the land mask:\n%s" % count_blobs_per_label(watershed).query("count > 1"))
+        logger.debug(
+            "after removing floes which intersect the land mask:\n%s"
+            % count_blobs_per_label(watershed).query("count > 1")
+        )
+        if save_figs:
+            imsave(
+                tci=tci,
+                img=markers,
+                save_direc=save_direc,
+                fname=f"{fname_prefix}identification_round_{r}_after_removing_landmasked_floes.tif",
+                count=1,
+                rollaxis=False,
+                res=res,
+                dtype=smallest_dtype(markers),
+            )
 
         # pdb.set_trace()
         # set the open water and already identified floes to no
         # watershed[~input_no] = 1
         mask_image(watershed, ~input_no, 1)
-        logger.debug("after removing already-identified floes:\n%s" % count_blobs_per_label(watershed).query("count > 1"))
+        logger.debug(
+            "after removing already-identified floes:\n%s"
+            % count_blobs_per_label(watershed).query("count > 1")
+        )
+        if save_figs:
+            imsave(
+                tci=tci,
+                img=markers,
+                save_direc=save_direc,
+                fname=f"{fname_prefix}identification_round_{r}_after_removing_already-identified_floes.tif",
+                count=1,
+                rollaxis=False,
+                res=res,
+                dtype=smallest_dtype(markers),
+            )
 
         # get rid of ones that are too small
         area_lim = (it) ** 4
@@ -220,7 +268,10 @@ def _preprocess(
         )
         df = pd.DataFrame.from_dict(props)
         watershed[np.isin(watershed, df[df.area < area_lim].label.values)] = 1
-        logger.debug("watershed after removing floes too small\n%s" % count_blobs_per_label(watershed).query("count > 1"))
+        logger.debug(
+            "watershed after removing floes too small\n%s"
+            % count_blobs_per_label(watershed).query("count > 1")
+        )
 
         if save_figs:
             fname = f"{fname_prefix}identification_round_{r}.tif"
@@ -238,7 +289,10 @@ def _preprocess(
         input_no = ice_mask + inp
         inp = (watershed == 1) & (inp == 1) & ice_mask
         watershed[watershed < 2] = 0
-        logger.debug("watershed after processing\n%s" % count_blobs_per_label(watershed).query("count > 1"))
+        logger.debug(
+            "watershed after processing\n%s"
+            % count_blobs_per_label(watershed).query("count > 1")
+        )
         new_label_mask = watershed > 0
         output[new_label_mask] = watershed[new_label_mask] + highest_label_so_far
         highest_label_so_far = np.max(output)
@@ -279,11 +333,11 @@ def _preprocess(
 
 
 def count_blobs_per_label(label_array):
-    df = pd.DataFrame({"label":[], "count":[]})
-    for label in np.unique(label_array)[1:]:
+    df = pd.DataFrame({"label": [], "count": []})
+    for label in np.unique(label_array):
         mask = label == label_array
         _, count = skimage.measure.label(mask, return_num=True)
-        df = pd.concat([df,  pd.DataFrame({"label":[label], "count":[count]})])
+        df = pd.concat([df, pd.DataFrame({"label": [label], "count": [count]})])
     return df
 
 
