@@ -268,6 +268,15 @@ def _preprocess(
     )
 
 
+def count_blobs_per_label(label_array):
+    df = pd.DataFrame({"label":[], "count":[]})
+    for label in np.unique(label_array)[1:]:
+        mask = label == label_array
+        _, count = skimage.measure.label(mask, return_num=True)
+        df = pd.concat([df,  pd.DataFrame({"label":[label], "count":[count]})])
+    return df
+
+
 def preprocess(
     ftci,
     fcloud,

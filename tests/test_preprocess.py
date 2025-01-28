@@ -3,13 +3,13 @@ import os
 import pytest
 from pathlib import Path
 import shutil
+import logging
 
-import numpy as np
 import rasterio
-import skimage.measure
 
-from ebfloeseg.preprocess import preprocess, preprocess_b 
+from ebfloeseg.preprocess import preprocess, preprocess_b, count_blobs_per_label
 
+logger = logging.getLogger(__name__)
 
 def test_process_exception(tmpdir):
     fcloud = "cloud.tif"
@@ -48,6 +48,7 @@ def batch_process_data_directory(tmp_path, date="2012-08-01", day=214, satellite
     shutil.copyfile(Path(f"{test_dir}/input/reproj_land.tiff"), tmp_path / Path("landmask.tiff"))
     shutil.copyfile(Path(f"{test_dir}/input/tci/tci_{date}_{day}_{satellite}.tiff"), tmp_path / Path("truecolor.tiff"))
     shutil.copyfile(Path(f"{test_dir}/input/cloud/cloud_{date}_{day}_{satellite}.tiff"), tmp_path / Path("cloud.tiff"))
+    logger.debug(f"initialized data in {tmp_path}")
     return tmp_path
 
 @pytest.fixture
@@ -56,6 +57,7 @@ def process_data_directory(tmp_path):
     shutil.copyfile(Path(f"{test_dir}/process/landmask.tiff"), tmp_path / Path("landmask.tiff"))
     shutil.copyfile(Path(f"{test_dir}/process/truecolor.tiff"), tmp_path / Path("truecolor.tiff"))
     shutil.copyfile(Path(f"{test_dir}/process/cloud.tiff"), tmp_path / Path("cloud.tiff"))
+    logger.debug(f"initialized data in {tmp_path}")
     return tmp_path
 
 def test_process_no_duplicated_labels(process_data_directory: Path):
@@ -77,10 +79,9 @@ def test_process_no_duplicated_labels(process_data_directory: Path):
 
     with rasterio.open(process_data_directory / "final.tif") as dataset:
         image_array = dataset.read()
-        for l in np.unique(image_array)[1:]:
-            mask = l == image_array
-            _, num = skimage.measure.label(mask, return_num=True)
-            assert num == 1, f"Disconnected component detected for label {l=}"
+        blobs_per_label = count_blobs_per_label(image_array)
+        for row in blobs_per_label.itertuples():
+            assert row.count == 1, f"{row.count} disconnected components detected for {row.label=}"
 
 
 
