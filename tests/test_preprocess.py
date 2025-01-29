@@ -1,12 +1,9 @@
 import datetime
-import os
 import pytest
 from pathlib import Path
-import shutil
 import logging
 
 import rasterio
-
 from ebfloeseg.preprocess import preprocess, preprocess_b, count_blobs_per_label
 
 logger = logging.getLogger(__name__)
@@ -43,50 +40,38 @@ def test_process_exception(tmpdir):
         )
 
 
-@pytest.fixture
-def batch_process_data_directory(
-    tmp_path, date="2012-08-01", day=214, satellite="terra"
+test_dir = Path(__file__).parent
+
+
+@pytest.mark.parametrize(
+    "truecolorimg,cloudimg,landmask",
+    [
+        (
+            test_dir / "process/truecolor.tiff",
+            test_dir / "process/cloud.tiff",
+            test_dir / "process/landmask.tiff",
+        ),
+        (
+            test_dir / "input/tci/tci_2012-08-01_214_terra.tiff",
+            test_dir / "input/cloud/cloud_2012-08-01_214_terra.tiff",
+            test_dir / "input/reproj_land.tiff",
+        ),
+        (
+            test_dir / "input/tci/tci_2012-08-02_215_terra.tiff",
+            test_dir / "input/cloud/cloud_2012-08-02_215_terra.tiff",
+            test_dir / "input/reproj_land.tiff",
+        ),
+    ],
+)
+def test_process_no_duplicated_labels(
+    truecolorimg: Path, cloudimg: Path, landmask: Path, tmp_path
 ):
-    test_dir = os.path.dirname(__file__)
-    shutil.copyfile(
-        Path(f"{test_dir}/input/reproj_land.tiff"), tmp_path / Path("landmask.tiff")
-    )
-    shutil.copyfile(
-        Path(f"{test_dir}/input/tci/tci_{date}_{day}_{satellite}.tiff"),
-        tmp_path / Path("truecolor.tiff"),
-    )
-    shutil.copyfile(
-        Path(f"{test_dir}/input/cloud/cloud_{date}_{day}_{satellite}.tiff"),
-        tmp_path / Path("cloud.tiff"),
-    )
-    logger.debug(f"initialized data in {tmp_path}")
-    return tmp_path
-
-
-@pytest.fixture
-def process_data_directory(tmp_path):
-    test_dir = os.path.dirname(__file__)
-    shutil.copyfile(
-        Path(f"{test_dir}/process/landmask.tiff"), tmp_path / Path("landmask.tiff")
-    )
-    shutil.copyfile(
-        Path(f"{test_dir}/process/truecolor.tiff"), tmp_path / Path("truecolor.tiff")
-    )
-    shutil.copyfile(
-        Path(f"{test_dir}/process/cloud.tiff"), tmp_path / Path("cloud.tiff")
-    )
-    logger.debug(f"initialized data in {tmp_path}")
-    return tmp_path
-
-
-def test_process_no_duplicated_labels(process_data_directory: Path):
-
     preprocess_b(
-        ftci=process_data_directory / "truecolor.tiff",
-        fcloud=process_data_directory / "cloud.tiff",
-        fland=process_data_directory / "landmask.tiff",
+        ftci=truecolorimg,
+        fcloud=cloudimg,
+        fland=landmask,
         save_figs=True,
-        save_direc=process_data_directory,
+        save_direc=tmp_path,
         fname_prefix="",
         itmax=8,
         itmin=3,
@@ -96,11 +81,12 @@ def test_process_no_duplicated_labels(process_data_directory: Path):
         date=datetime.date.fromisoformat("2001-01-01"),
     )
 
-    with rasterio.open(process_data_directory / "final.tif") as dataset:
+    with rasterio.open(tmp_path / "final.tif") as dataset:
         image_array = dataset.read()
         blobs_per_label = count_blobs_per_label(image_array)
+        background_label = 0
         for row in blobs_per_label.itertuples():
-            if row.label < 1:
+            if row.label == background_label:
                 continue
             logger.debug(row)
             assert (
