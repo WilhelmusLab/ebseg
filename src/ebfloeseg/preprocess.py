@@ -203,7 +203,6 @@ def _preprocess(
             )
         ] = 1
 
-        # pdb.set_trace()
         # set the open water and already identified floes to no
         # watershed[~input_no] = 1
         mask_image(watershed, ~input_no, 1)
