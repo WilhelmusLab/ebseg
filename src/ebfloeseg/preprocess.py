@@ -300,6 +300,8 @@ def _preprocess(
 
     # saving the props table
     output = opening(output)
+    logger.debug("output after opening\n %s" % count_blobs_per_label(output).query("count > 1"))
+
     fname_infix = ""
     if sat:
         fname_infix = f"{sat}_{fname_infix}"
