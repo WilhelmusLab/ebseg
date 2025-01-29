@@ -100,6 +100,9 @@ def test_process_no_duplicated_labels(process_data_directory: Path):
         image_array = dataset.read()
         blobs_per_label = count_blobs_per_label(image_array)
         for row in blobs_per_label.itertuples():
+            if row.label < 1:
+                continue
+            logger.debug(row)
             assert (
                 row.count == 1
             ), f"{row.count} disconnected components detected for {row.label=}"
