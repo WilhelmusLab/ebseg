@@ -296,7 +296,7 @@ def _preprocess(
         new_label_mask = watershed > 0
         output[new_label_mask] = watershed[new_label_mask] + highest_label_so_far
         highest_label_so_far = np.max(output)
-        logger.debug("output\n %s" % count_blobs_per_label(output).query("count > 1"))
+        logger.debug("output after this iteration\n %s" % count_blobs_per_label(output).query("count > 1"))
 
     # saving the props table
     output = opening(output)
