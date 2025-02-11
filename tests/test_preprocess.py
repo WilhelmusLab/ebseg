@@ -114,7 +114,7 @@ def test_process_no_duplicated_labels(
         np.array([[1, 1, 1, 1], [1, 0, 0, 0], [0, 3, 0, 0], [1, 2, 2, 2]]),
     ],
 )
-def test_clean_labels_with_multiple_blobs_idempotent(original):
+def test_clean_labels_with_multiple_blobs_is_idempotent(original):
     cleaned_once = clean_labels_with_multiple_blobs(original)
     cleaned_twice = clean_labels_with_multiple_blobs(cleaned_once)
     np.testing.assert_array_equal(cleaned_once, cleaned_twice)
@@ -165,7 +165,9 @@ def test_clean_labels_with_multiple_blobs_idempotent(original):
         ),
     ],
 )
-def test_clean_labels_with_multiple_blobs(original, expected_cleaned):
+def test_clean_labels_with_multiple_blobs_works_for_simple_cases(
+    original, expected_cleaned
+):
     np.testing.assert_array_equal(
         clean_labels_with_multiple_blobs(original), expected_cleaned
     )
@@ -176,9 +178,12 @@ def test_clean_labels_with_multiple_blobs(original, expected_cleaned):
     [
         np.array([[1, 0, 0], [0, 0, 0], [0, 0, 1]]),
         np.array([[1, 1, 1], [0, 0, 0], [1, 1, 1]]),
+        np.array([[1, 1, 1], [2, 2, 2], [1, 1, 1]]),
     ],
 )
-def test_clean_labels_with_multiple_blobs_throws_error(original):
+def test_clean_labels_with_multiple_blobs_throws_errors_when_two_blobs_have_the_same_size(
+    original,
+):
     with pytest.raises(AssertionError):
         clean_labels_with_multiple_blobs(original)
 
