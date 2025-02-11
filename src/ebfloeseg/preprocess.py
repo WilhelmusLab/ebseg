@@ -235,8 +235,20 @@ def _preprocess(
         output[new_label_mask] = watershed[new_label_mask] + highest_label_so_far
         highest_label_so_far = np.max(output)
 
+    # Clean the final props
+    blobs_per_label = count_blobs_per_label(output)
+    for row in blobs_per_label.query("label > 0 & count > 1").itertuples():
+        mask = output == row.label
+        relabeled, count = skimage.measure.label(mask, return_num=True)
+        assert count > 1
+        relabeled_props = pd.DataFrame(
+            skimage.measure.regionprops_table(relabeled, properties=["label", "area"])
+        ).sort_values(by="area", ascending=False)
+        for blob in relabeled_props.iloc[1:].itertuples():
+            blob_mask = relabeled == blob.label
+            output[blob_mask] = 0
+
     # saving the props table
-    output = opening(output)
     fname_infix = ""
     if sat:
         fname_infix = f"{sat}_{fname_infix}"
