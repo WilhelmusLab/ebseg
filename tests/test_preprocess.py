@@ -2,9 +2,15 @@ import datetime
 import pytest
 from pathlib import Path
 import logging
+import numpy as np
 
 import rasterio
-from ebfloeseg.preprocess import preprocess, preprocess_b, count_blobs_per_label
+from ebfloeseg.preprocess import (
+    preprocess,
+    preprocess_b,
+    count_blobs_per_label,
+    clean_labels_with_multiple_blobs,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +98,77 @@ def test_process_no_duplicated_labels(
             assert (
                 row.count == 1
             ), f"{row.count} disconnected components detected for {row.label=}"
+
+
+@pytest.mark.parametrize(
+    "original",
+    [
+        np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]]),
+        np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]]),
+        np.array([[1, 1, 0], [1, 0, 0], [0, 0, 1]]),
+        np.array([[1, 1, 0], [1, 0, 0], [0, 0, 0]]),
+        np.array([[1, 1, 0], [1, 0, 0], [0, 0, 2]]),
+        np.array([[1, 1, 2], [1, 2, 2], [2, 2, 2]]),
+        np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
+        np.array([[1, 1, 1, 1], [1, 0, 0, 0], [0, 0, 0, 0], [1, 0, 0, 0]]),
+        np.array([[1, 1, 1, 1], [1, 0, 0, 0], [0, 3, 0, 0], [1, 2, 2, 2]]),
+    ],
+)
+def test_clean_labels_with_multiple_blobs_idempotent(original):
+    cleaned_once = clean_labels_with_multiple_blobs(original)
+    cleaned_twice = clean_labels_with_multiple_blobs(cleaned_once)
+    np.testing.assert_array_equal(cleaned_once, cleaned_twice)
+
+
+@pytest.mark.parametrize(
+    "original,expected_cleaned",
+    [
+        (  # No change, all zeros
+            np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]]),
+            np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]]),
+        ),
+        (  # No change, all ones
+            np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]]),
+            np.array([[1, 1, 1], [1, 1, 1], [1, 1, 1]]),
+        ),
+        (  # No change, diamond
+            np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]]),
+            np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]]),
+        ),
+        (  # Small cleanup, opposite corners
+            np.array([[1, 1, 0], [1, 0, 0], [0, 0, 1]]),
+            np.array([[1, 1, 0], [1, 0, 0], [0, 0, 0]]),
+        ),
+        (  # 8-connected opposite corner, no change
+            np.array([[1, 1, 0], [0, 1, 0], [0, 0, 1]]),
+            np.array([[1, 1, 0], [0, 1, 0], [0, 0, 1]]),
+        ),
+        (  # No change
+            np.array([[1, 1, 0], [1, 0, 0], [0, 0, 2]]),
+            np.array([[1, 1, 0], [1, 0, 0], [0, 0, 2]]),
+        ),
+        (  # No change
+            np.array([[1, 1, 2], [1, 2, 2], [2, 2, 2]]),
+            np.array([[1, 1, 2], [1, 2, 2], [2, 2, 2]]),
+        ),
+        (  # No change
+            np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
+            np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]),
+        ),
+        (  # 4x4, small cleanup
+            np.array([[1, 1, 1, 1], [1, 0, 0, 0], [0, 0, 0, 0], [1, 0, 0, 0]]),
+            np.array([[1, 1, 1, 1], [1, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]),
+        ),
+        (  # 4x4, small cleanup
+            np.array([[1, 1, 1, 1], [1, 0, 0, 0], [0, 3, 0, 0], [1, 2, 2, 2]]),
+            np.array([[1, 1, 1, 1], [1, 0, 0, 0], [0, 3, 0, 0], [0, 2, 2, 2]]),
+        ),
+    ],
+)
+def test_clean_labels_with_multiple_blobs(original, expected_cleaned):
+    np.testing.assert_array_equal(
+        clean_labels_with_multiple_blobs(original), expected_cleaned
+    )
 
 
 if __name__ == "__main__":

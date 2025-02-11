@@ -280,7 +280,7 @@ def count_blobs_per_label(label_array):
     return df
 
 
-def clean_labels_with_multiple_blobs(label_array):
+def clean_labels_with_multiple_blobs(label_array, factor_threshold=5):
     label_array_ = np.copy(label_array)
     blobs_per_label = count_blobs_per_label(label_array_)
     for row in blobs_per_label.query("label > 0 & count > 1").itertuples():
@@ -289,8 +289,29 @@ def clean_labels_with_multiple_blobs(label_array):
         assert count > 1
         relabeled_props = pd.DataFrame(
             skimage.measure.regionprops_table(relabeled, properties=["label", "area"])
-        ).sort_values(by="area", ascending=False)
-        for blob in relabeled_props.iloc[1:].itertuples():
+        )
+        ordered_relabeled_props = relabeled_props.sort_values(
+            by="area", ascending=False
+        )
+        blob_generator = ordered_relabeled_props.itertuples()
+        largest_blob = next(blob_generator)
+        for blob in blob_generator:
+            # Exception if this blob isn't strictly smaller than the largest blob
+            assert (
+                blob.area < largest_blob.area
+            ), "blob %s area %s is not smaller than 'largest_blob' %s with area %s" % (
+                blob.label,
+                blob.area,
+                largest_blob.label,
+                largest_blob.area,
+            )
+            # Check that the blob is at least factor_threshold times smaller than the "main" blob
+            # and throw a warning if it isn't
+            if blob.area * factor_threshold > largest_blob.area:
+                logger.warning(
+                    "Blob %s has area %s, larger than 1/%s of largest blob area %s"
+                    % (blob.label, blob.area, factor_threshold, largest_blob.area)
+                )
             blob_mask = relabeled == blob.label
             label_array_[blob_mask] = 0
     return label_array_
