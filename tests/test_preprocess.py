@@ -171,5 +171,17 @@ def test_clean_labels_with_multiple_blobs(original, expected_cleaned):
     )
 
 
+@pytest.mark.parametrize(
+    "original",
+    [
+        np.array([[1, 0, 0], [0, 0, 0], [0, 0, 1]]),
+        np.array([[1, 1, 1], [0, 0, 0], [1, 1, 1]]),
+    ],
+)
+def test_clean_labels_with_multiple_blobs_throws_error(original):
+    with pytest.raises(AssertionError):
+        clean_labels_with_multiple_blobs(original)
+
+
 if __name__ == "__main__":
     pytest.main()
