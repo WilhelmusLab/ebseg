@@ -236,17 +236,7 @@ def _preprocess(
         highest_label_so_far = np.max(output)
 
     # Clean the final props
-    blobs_per_label = count_blobs_per_label(output)
-    for row in blobs_per_label.query("label > 0 & count > 1").itertuples():
-        mask = output == row.label
-        relabeled, count = skimage.measure.label(mask, return_num=True)
-        assert count > 1
-        relabeled_props = pd.DataFrame(
-            skimage.measure.regionprops_table(relabeled, properties=["label", "area"])
-        ).sort_values(by="area", ascending=False)
-        for blob in relabeled_props.iloc[1:].itertuples():
-            blob_mask = relabeled == blob.label
-            output[blob_mask] = 0
+    output = clean_labels_with_multiple_blobs(output)
 
     # saving the props table
     fname_infix = ""
@@ -288,6 +278,22 @@ def count_blobs_per_label(label_array):
         _, count = skimage.measure.label(mask, return_num=True)
         df = pd.concat([df, pd.DataFrame({"label": [label], "count": [count]})])
     return df
+
+
+def clean_labels_with_multiple_blobs(label_array):
+    label_array_ = np.copy(label_array)
+    blobs_per_label = count_blobs_per_label(label_array_)
+    for row in blobs_per_label.query("label > 0 & count > 1").itertuples():
+        mask = label_array_ == row.label
+        relabeled, count = skimage.measure.label(mask, return_num=True)
+        assert count > 1
+        relabeled_props = pd.DataFrame(
+            skimage.measure.regionprops_table(relabeled, properties=["label", "area"])
+        ).sort_values(by="area", ascending=False)
+        for blob in relabeled_props.iloc[1:].itertuples():
+            blob_mask = relabeled == blob.label
+            label_array_[blob_mask] = 0
+    return label_array_
 
 
 def preprocess(
