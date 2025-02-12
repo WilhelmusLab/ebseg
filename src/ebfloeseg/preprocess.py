@@ -236,6 +236,7 @@ def _preprocess(
         highest_label_so_far = np.max(output)
 
     # Clean the final props
+    output = opening(output)
     output = clean_labels_with_multiple_blobs(output)
 
     # saving the props table
