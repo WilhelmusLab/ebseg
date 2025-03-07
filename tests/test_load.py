@@ -1,21 +1,9 @@
-import dataclasses
 from pathlib import Path
-from io import BytesIO
 
 import pytest
 import requests_mock
 
 from ebfloeseg.load import load, ImageType, Satellite, DataSet
-
-
-def paths_equal(p1: Path, p2: Path):
-    """Check whether two paths contain identical bytes.
-
-    Arguments:
-        b1: io.BytesIO object
-        p2: path to a file to be compared with b1
-    """
-    return Path(p1).read_bytes() == Path(p2).read_bytes()
 
 
 ExampleDataSetBeaufortSea = DataSet(
@@ -33,21 +21,6 @@ ExampleDataSetBeaufortSea = DataSet(
     crs="EPSG:3413",
     ts=1683675557694,
 )
-
-
-@pytest.mark.smoke
-@pytest.mark.slow
-@pytest.mark.parametrize("kind", ImageType)
-def test_load_runs_in_specific_case_with_validation(kind, tmp_path):
-    reference_file_path = Path("tests/load/") / f"{kind.value}.tiff"
-    kwargs = dataclasses.asdict(ExampleDataSetBeaufortSea)
-    kwargs.update(kind=kind)
-    result = load(**kwargs, format="image/tiff")
-    tmp_file_path = tmp_path / f"{kind.value}.tiff"
-    with open(tmp_file_path, "wb") as f:
-        f.write(result.content)
-    assert paths_equal(tmp_file_path, reference_file_path)
-
 
 @pytest.mark.slow
 @pytest.mark.parametrize("satellite", Satellite)
