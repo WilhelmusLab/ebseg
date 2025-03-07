@@ -22,6 +22,7 @@ ExampleDataSetBeaufortSea = DataSet(
     ts=1683675557694,
 )
 
+
 @pytest.mark.slow
 @pytest.mark.parametrize("satellite", Satellite)
 @pytest.mark.parametrize("kind", ImageType)
