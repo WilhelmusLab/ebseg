@@ -3,10 +3,13 @@ import io
 import logging
 from collections import namedtuple
 from enum import Enum
+import pathlib
+from typing import Optional
 
 import numpy as np
 import rasterio
 import requests
+import requests_cache
 from rasterio.enums import ColorInterp
 
 from ebfloeseg.bbox import BoundingBox
@@ -160,6 +163,7 @@ def load(
     ts: int = ExampleDataSetBeaufortSea.ts,
     format: str = "image/tiff",
     validate: bool = True,
+    cache_directory: Optional[pathlib.Path] = None,
 ) -> LoadResult:
     """Load an image from the NASA Worldview Snapshots API"""
 
@@ -198,7 +202,13 @@ def load(
         "HEIGHT": height,
         "ts": ts,
     }
-    r = requests.get(url, params=payload, allow_redirects=True)
+
+    if cache_directory is not None:
+        session = requests_cache.CachedSession(cache_directory)
+    else:
+        session = requests.Session()
+
+    r = session.get(url, params=payload, allow_redirects=True)
     r.raise_for_status()
 
     img = rasterio.open(io.BytesIO(r.content))

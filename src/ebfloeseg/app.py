@@ -81,6 +81,10 @@ def load(
     ts: int = ExampleDataSet.ts,
     format: str = "image/tiff",
     validate: Annotated[bool, typer.Option(help="validate the image")] = True,
+    cache_directory: Annotated[
+        Optional[Path],
+        typer.Option(help="location of the cache directory for loaded images"),
+    ] = None,
 ):
     _logger.debug(locals())
 
@@ -95,6 +99,7 @@ def load(
         ts=ts,
         format=format,
         validate=validate,
+        cache_directory=cache_directory,
     )
 
     with open(outfile, "wb") as f:
