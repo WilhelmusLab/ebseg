@@ -272,12 +272,16 @@ def _preprocess(
     )
 
 
+def count_blobs(mask):
+    _, count = skimage.measure.label(mask, return_num=True)
+    return count
+
+
 def count_blobs_per_label(label_array):
-    df = pd.DataFrame({"label": [], "count": []})
-    for label in np.unique(label_array):
-        mask = label == label_array
-        _, count = skimage.measure.label(mask, return_num=True)
-        df = pd.concat([df, pd.DataFrame({"label": [label], "count": [count]})])
+    results = [
+        (label, count_blobs(label_array == label)) for label in np.unique(label_array)
+    ]
+    df = pd.DataFrame.from_records(results, columns=["label", "count"])
     return df
 
 
